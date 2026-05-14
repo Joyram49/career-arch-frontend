@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "ES2022"
-    ],
+    "lib": ["dom", "dom.iterable", "ES2022"],
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
@@ -26,45 +22,20 @@
       }
     ],
     "paths": {
-      "@app/*": [
-        "./src/app/*"
-      ],
-      "@ui/*": [
-        "./src/components/ui/*"
-      ],
-      "@components/*": [
-        "./src/components/*"
-      ],
-      "@hooks/*": [
-        "./src/hooks/*"
-      ],
-      "@lib/*": [
-        "./src/lib/*"
-      ],
-      "@services/*": [
-        "./src/services/*"
-      ],
-      "@providers/*": [
-        "./src/providers/*"
-      ],
-      "@validations/*": [
-        "./src/validations/*"
-      ],
-      "@app-types/*": [
-        "./src/types/*"
-      ],
-      "@config/*": [
-        "./src/config/*"
-      ],
-      "@constants/*": [
-        "./src/constants/*"
-      ],
-      "@utils/*": [
-        "./src/utils/"
-      ],
-      "@/*": [
-        "./src/*"
-      ]
+      "@app/*": ["./src/app/*"],
+      "@ui/*": ["./src/components/ui/*"],
+      "@components/*": ["./src/components/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@services/*": ["./src/services/*"],
+      "@providers/*": ["./src/providers/*"],
+      "@validations/*": ["./src/validations/*"],
+      "@app-types/*": ["./src/types/*"],
+      "@config/*": ["./src/config/*"],
+      "@constants/*": ["./src/constants/*"],
+      "@utils/*": ["./src/utils/"],
+      "@assets/*": ["./src/assets/*"],
+      "@/*": ["./src/*"]
     }
   },
   "include": [
@@ -75,7 +46,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
