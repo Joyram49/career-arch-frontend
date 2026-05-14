@@ -14,6 +14,7 @@
 :root {
   /* ── Brand Palette ── */
   --brand-navy: #1a1a2e;
+  --brand-navy-foreground: #1d2439;
   --brand-navy-deep: #0f172a;
   --brand-sky: #0ea5e9;
   --brand-sky-light: #e0f2fe;
@@ -176,6 +177,11 @@
   --input-foreground: #e2e8f0;
   --ring: #0ea5e9;
 
+  /* brand colors */
+
+  --brand-navy: #1d2439;
+  --brand-navy-foreground: #1a1a2e;
+
   /* ── Sidebar — Dark ── */
   --sidebar: #070d1a;
   --sidebar-foreground: #94a3b8;
@@ -242,6 +248,7 @@
 
   /* Brand */
   --color-brand-navy: var(--brand-navy);
+  --color-brand-navy-foreground: var(--brand-navy-foreground);
   --color-brand-navy-deep: var(--brand-navy-deep);
   --color-brand-sky: var(--brand-sky);
   --color-brand-sky-light: var(--brand-sky-light);
@@ -327,65 +334,6 @@ body {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
-}
-
-/* ─────────────────────────────────────────────
-   TYPOGRAPHY
-   ──────────────────────────────────────────── */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-display);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  color: var(--foreground);
-}
-
-h1 {
-  font-size: clamp(2rem, 4vw, 3.5rem);
-}
-h2 {
-  font-size: clamp(1.5rem, 3vw, 2.25rem);
-}
-h3 {
-  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-}
-h4 {
-  font-size: 1.25rem;
-}
-h5 {
-  font-size: 1.125rem;
-}
-h6 {
-  font-size: 1rem;
-}
-
-p {
-  color: var(--foreground);
-  line-height: 1.7;
-}
-
-a {
-  color: var(--brand-sky);
-  text-decoration: none;
-  transition: color var(--transition-fast);
-}
-
-a:hover {
-  color: var(--brand-sky-dark);
-  text-decoration: underline;
-}
-
-code,
-kbd,
-samp,
-pre {
-  font-family: var(--font-mono);
-  font-size: 0.875em;
 }
 
 /* ─────────────────────────────────────────────
