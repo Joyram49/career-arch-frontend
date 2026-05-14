@@ -1,7 +1,7 @@
 import { ReactQueryProvider } from '@providers/react-query-provider';
 import type { Metadata, Viewport } from 'next';
 
-import { ThemeProvider } from '@components/shared/theme-provider';
+import { ThemeProvider } from '@providers/theme-provider';
 import { JetBrains_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { Toaster } from 'sonner';
