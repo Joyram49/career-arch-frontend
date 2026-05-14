@@ -7,11 +7,7 @@ const ContainerLayout = ({
   children: React.ReactNode;
   className?: string;
 }) => {
-  return (
-    <div className="bg-background">
-      <div className={cn('container mx-auto px-4', className)}>{children}</div>
-    </div>
-  );
+  return <div className={cn('container mx-auto px-4', className)}>{children}</div>;
 };
 
 export default ContainerLayout;
