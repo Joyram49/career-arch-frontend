@@ -2,10 +2,12 @@
 
 import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 
+import { resendVerificationEmail } from '@services/user/auth';
 import { Button } from '@ui/button';
 import { Separator } from '@ui/separator';
+import { toast } from 'sonner';
 
 // ── Types ────────────────────────────────────────────────────────
 interface VerifyEmailCardProps {
@@ -117,9 +119,9 @@ function CountdownBadge({ seconds }: { seconds: number }): React.JSX.Element {
 export function VerifyEmailCard({ email }: VerifyEmailCardProps): React.JSX.Element {
   const [countdown, setCountdown] = useState(RESEND_COOLDOWN);
   const [resendCount, setResendCount] = useState(0);
-  const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const startCountdown = useCallback(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -143,15 +145,21 @@ export function VerifyEmailCard({ email }: VerifyEmailCardProps): React.JSX.Elem
   }, [startCountdown]);
 
   async function handleResend(): Promise<void> {
-    if (countdown > 0 || isResending) return;
-    setIsResending(true);
+    if (countdown > 0 || isPending || email === undefined) return;
     setResendSuccess(false);
     // TODO: replace with actual resend API call — services/auth.service.ts
-    await new Promise((r) => setTimeout(r, 1200));
-    setIsResending(false);
-    setResendSuccess(true);
-    setResendCount((c) => c + 1);
-    startCountdown();
+    startTransition(async () => {
+      const result = await resendVerificationEmail({ email });
+      if (result.success) {
+        setResendSuccess(true);
+        setResendCount((c) => c + 1);
+        startCountdown();
+        toast.success('Verification email resent. Please check your inbox.');
+      } else {
+        toast.error(result.message);
+      }
+    });
+
     // Auto-clear success message after 4s
     setTimeout(() => setResendSuccess(false), 4000);
   }
@@ -224,12 +232,12 @@ export function VerifyEmailCard({ email }: VerifyEmailCardProps): React.JSX.Elem
           <button
             type="button"
             onClick={handleResend}
-            disabled={countdown > 0 || isResending}
+            disabled={countdown > 0 || isPending}
             aria-label="Resend verification email"
             className="hidden w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 px-5 py-3.5 text-sm font-semibold text-foreground transition-all hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60 sm:flex"
           >
             <span className="flex items-center gap-2.5">
-              {isResending ? (
+              {isPending ? (
                 <span className="size-4 animate-spin rounded-full border-2 border-border border-t-brand-sky" />
               ) : (
                 <svg
@@ -248,7 +256,7 @@ export function VerifyEmailCard({ email }: VerifyEmailCardProps): React.JSX.Elem
                   />
                 </svg>
               )}
-              {isResending ? 'Sending...' : 'Resend verification email'}
+              {isPending ? 'Sending...' : 'Resend verification email'}
             </span>
             {countdown > 0 && <CountdownBadge seconds={countdown} />}
           </button>
@@ -260,10 +268,10 @@ export function VerifyEmailCard({ email }: VerifyEmailCardProps): React.JSX.Elem
               <button
                 type="button"
                 onClick={handleResend}
-                disabled={countdown > 0 || isResending}
+                disabled={countdown > 0 || isPending}
                 className="text-sm font-bold text-brand-sky underline-offset-2 transition-all hover:underline disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isResending ? 'Sending...' : 'Resend verification email'}
+                {isPending ? 'Sending...' : 'Resend verification email'}
               </button>
               {countdown > 0 && <CountdownBadge seconds={countdown} />}
             </div>
