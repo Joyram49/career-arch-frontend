@@ -19,6 +19,7 @@ export const routes = {
   registerOrg: '/register-org',
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
+  sendVerifyEmail: '/send-verify-email',
   verifyEmail: '/verify-email',
   twoFaVerify: '/2fa/verify',
   twoFaSetup: '/2fa/setup',

@@ -1,7 +1,6 @@
 'use client';
 
 // ── Password Strength Meter ─────────────────────────────────────
-// Renders a segmented bar + criteria checklist below the password field.
 
 interface PasswordCriteria {
   met: boolean;
