@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -19,6 +19,9 @@ import { registerSchema } from '@validations/auth.schema';
 // ✅ Icons always from @assets/icons/custom
 import { EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon, UserIcon } from '@assets/icons/custom';
 import { PasswordStrengthMeter } from '@components/shared/password-strength-meter';
+import { userRegistration } from '@services/user/auth';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { SocialAuth } from './social-auth';
 // ── Animation Variants ──────────────────────────────────────────
 // ✅ Typed Variants, ease as cubic-bezier (not string)
@@ -46,11 +49,15 @@ export function RegisterForm(): React.JSX.Element {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
   const {
     handleSubmit,
     control,
     watch,
-    formState: { errors, isSubmitting },
+    setError,
+    formState: { errors },
   } = useForm<RegisterInput>({
     // ✅ Cast resolver — registerSchema has .refine() which can cause type mismatch
     resolver: zodResolver(registerSchema) as Resolver<RegisterInput>,
@@ -68,9 +75,25 @@ export function RegisterForm(): React.JSX.Element {
   const passwordValue = watch('password');
 
   async function onSubmit(data: RegisterInput): Promise<void> {
-    // TODO: replace with useRegisterMutation from @queries/use-auth
-    await new Promise((r) => setTimeout(r, 1400));
-    console.log('Register payload:', data);
+    startTransition(async () => {
+      const result = await userRegistration({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
+      });
+
+      if (!result.success) {
+        if (result.fieldErrors !== undefined) {
+          result.fieldErrors.forEach(({ field, message }) => {
+            setError(field as keyof RegisterInput, { message });
+          });
+        }
+        toast.error(result.message);
+        return;
+      }
+      router.push(`/send-verify-email?email=${encodeURIComponent(data.email)}&sent=true`);
+    });
   }
 
   return (
@@ -338,10 +361,10 @@ export function RegisterForm(): React.JSX.Element {
             {/* ── Submit Button ── */}
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isPending}
               className="mt-1 h-12 w-full cursor-pointer rounded-xl bg-brand-navy text-[15px] font-bold text-white transition-all duration-150 hover:-translate-y-px hover:bg-brand-navy/90 hover:shadow-card active:translate-y-0"
             >
-              {isSubmitting ? (
+              {isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                   Creating account...
