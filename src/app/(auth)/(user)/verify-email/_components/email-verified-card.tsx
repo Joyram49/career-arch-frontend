@@ -106,7 +106,7 @@ function AutoRedirectBar(): React.JSX.Element {
       setSeconds((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
-          router.push('/dashboard');
+          router.push('/login');
           return 0;
         }
         return prev - 1;
@@ -120,7 +120,7 @@ function AutoRedirectBar(): React.JSX.Element {
   return (
     <div className="space-y-2">
       <p className="text-center text-xs text-muted-foreground">
-        Redirecting to dashboard in{' '}
+        Redirecting to sign in{' '}
         <span className="font-bold text-foreground tabular-nums">{seconds}s</span>
       </p>
       {/* Progress bar */}
@@ -183,6 +183,7 @@ export function EmailVerifiedCard(): React.JSX.Element {
           </p>
           <ul className="space-y-2.5">
             {[
+              'Signin to your account',
               'Complete your profile to get noticed by employers',
               'Browse thousands of jobs matching your skills',
               'Track your applications from one dashboard',
@@ -199,30 +200,20 @@ export function EmailVerifiedCard(): React.JSX.Element {
 
         {/* CTA Buttons */}
         <motion.div variants={itemVariants} className="space-y-3">
-          <Link href={{ pathname: '/dashboard' }} className="block">
+          <Link href={{ pathname: '/login' }} className="block">
             <Button
               type="button"
               className="h-12 w-full cursor-pointer rounded-xl bg-brand-navy text-[15px] font-bold text-white transition-all duration-150 hover:-translate-y-px hover:bg-brand-navy/90 hover:shadow-card active:translate-y-0"
             >
-              Go to Dashboard
-            </Button>
-          </Link>
-
-          <Link href={{ pathname: '/dashboard/profile' }} className="block">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-11 w-full cursor-pointer rounded-xl border-border text-sm font-semibold transition-all hover:bg-muted"
-            >
-              Complete my profile
+              Sign in
             </Button>
           </Link>
         </motion.div>
 
         {/* Auto redirect countdown */}
-        <motion.div variants={itemVariants} className="mt-5">
+        {/* <motion.div variants={itemVariants} className="mt-5">
           <AutoRedirectBar />
-        </motion.div>
+        </motion.div> */}
 
         {/* Security footer — exact same as verify card */}
         <div className="mt-6 flex items-center gap-3">
