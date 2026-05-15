@@ -18,10 +18,8 @@ import { registerSchema } from '@validations/auth.schema';
 
 // ✅ Icons always from @assets/icons/custom
 import { EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon, UserIcon } from '@assets/icons/custom';
-
-import { PasswordStrengthMeter } from './password-strength-meter';
+import { PasswordStrengthMeter } from '@components/shared/password-strength-meter';
 import { SocialAuth } from './social-auth';
-
 // ── Animation Variants ──────────────────────────────────────────
 // ✅ Typed Variants, ease as cubic-bezier (not string)
 const containerVariants: Variants = {
