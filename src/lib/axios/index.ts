@@ -1,4 +1,5 @@
 import { IApiResponse } from '@app-types/api';
+import { envConfig } from '@config/envConfig';
 import axios, {
   type AxiosError,
   type AxiosInstance,
@@ -12,7 +13,7 @@ import axios, {
    We never manually attach Authorization headers
    ──────────────────────────────────────────── */
 const api: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: envConfig.apiUrl,
   withCredentials: true,
   timeout: 15_000,
   headers: {
