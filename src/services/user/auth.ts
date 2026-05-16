@@ -190,3 +190,104 @@ export async function verifyEmail(payload: { token: string }): Promise<RegisterR
     message: body.message,
   };
 }
+
+/* ─────────────────────────────────────────────
+   forgotPassword — Server Action
+   Calls POST /auth/user/forgot-password
+   Backend sends a password-reset email if the address is found.
+   Always returns a generic message (prevents email enumeration).
+   ──────────────────────────────────────────── */
+export async function forgotPassword(payload: { email: string }): Promise<RegisterResult> {
+  let response: Response;
+
+  try {
+    response = await fetch(`${envConfig.apiUrl}/auth/user/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: payload.email }),
+      cache: 'no-store',
+    });
+  } catch {
+    return {
+      success: false,
+      message: 'Unable to reach the server. Please check your connection and try again.',
+    };
+  }
+
+  let body: {
+    success: boolean;
+    message: string;
+    errors: Array<{ field: string; message: string }>;
+  };
+
+  try {
+    body = await response.json();
+  } catch {
+    return { success: false, message: 'Unexpected server response. Please try again.' };
+  }
+
+  if (!response.ok) {
+    return {
+      success: false,
+      message: body.message ?? 'Failed to send reset link. Please try again later.',
+      fieldErrors: body.errors,
+    };
+  }
+
+  return { success: true, message: body.message };
+}
+
+/* ─────────────────────────────────────────────
+   resetPassword — Server Action
+   Calls POST /auth/user/reset-password
+   Requires the one-time token from the reset email (URL search param),
+   plus the new password and confirmation.
+   On success the user must sign in with the new password.
+   ──────────────────────────────────────────── */
+export async function resetPassword(payload: {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}): Promise<RegisterResult> {
+  let response: Response;
+
+  try {
+    response = await fetch(`${envConfig.apiUrl}/auth/user/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: payload.token,
+        newPassword: payload.newPassword,
+        confirmPassword: payload.confirmPassword,
+      }),
+      cache: 'no-store',
+    });
+  } catch {
+    return {
+      success: false,
+      message: 'Unable to reach the server. Please check your connection and try again.',
+    };
+  }
+
+  let body: {
+    success: boolean;
+    message: string;
+    errors: Array<{ field: string; message: string }>;
+  };
+
+  try {
+    body = await response.json();
+  } catch {
+    return { success: false, message: 'Unexpected server response. Please try again.' };
+  }
+
+  if (!response.ok) {
+    return {
+      success: false,
+      message: body.message ?? 'Password reset failed. Please request a new link.',
+      fieldErrors: body.errors,
+    };
+  }
+
+  return { success: true, message: body.message };
+}
