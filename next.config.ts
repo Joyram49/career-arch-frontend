@@ -1,28 +1,30 @@
 import type { NextConfig } from 'next';
 
+const isDev = process.env.NEXT_PUBLIC_ENVIRONMENT === 'development';
+
+const backendUrl = isDev
+  ? process.env.BACKEND_LOCAL_URL // http://localhost:5000
+  : process.env.BACKEND_PRODUCTION_URL; // https://career-arch.onrender.com
+
 const nextConfig: NextConfig = {
-  // Turbopack is default in Next.js 16 — no flag needed
-  // React Compiler is stable in Next.js 16
   reactCompiler: true,
+
+  async rewrites() {
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${backendUrl}/api/v1/:path*`,
+      },
+    ];
+  },
 
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com', // Google OAuth avatars — Phase 5
-      },
-      {
-        protocol: 'https',
-        hostname: 'media.licdn.com', // LinkedIn OAuth avatars — Phase 5
-      },
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+      { protocol: 'https', hostname: 'media.licdn.com' },
     ],
   },
-
-  typedRoutes: true,
 
   async headers() {
     return [
@@ -32,10 +34,7 @@ const nextConfig: NextConfig = {
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
     ];
