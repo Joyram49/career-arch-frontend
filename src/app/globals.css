@@ -58,6 +58,8 @@
   --input-foreground: #0f172a;
   --ring: #0ea5e9;
 
+  --admin-bg: #090e1a;
+
   /* ── Sidebar ── */
   --sidebar: #1a1a2e;
   --sidebar-foreground: #cbd5e1;
@@ -177,6 +179,8 @@
   --input-foreground: #e2e8f0;
   --ring: #0ea5e9;
 
+  --admin-bg: #090e1a;
+
   /* brand colors */
 
   --brand-navy: #1d2439;
@@ -245,6 +249,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --admin-bg: var(--admin-bg);
 
   /* Brand */
   --color-brand-navy: var(--brand-navy);
