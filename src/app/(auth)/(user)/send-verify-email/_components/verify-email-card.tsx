@@ -4,7 +4,7 @@ import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 
-import { resendVerificationEmail } from '@services/user/auth';
+import { resendVerificationEmail } from '@services/user/auth.service';
 import { Button } from '@ui/button';
 import { Separator } from '@ui/separator';
 import { toast } from 'sonner';

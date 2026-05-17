@@ -11,7 +11,7 @@ import { Input } from '@ui/input';
 
 import { MailIcon } from '@assets/icons/custom';
 
-import { forgotPassword } from '@services/user/auth';
+import { forgotPassword } from '@services/user/auth.service';
 import type { ForgotPasswordInput } from '@validations/auth.schema';
 import { forgotPasswordSchema } from '@validations/auth.schema';
 import { useTransition } from 'react';
