@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -15,8 +15,15 @@ import { EyeOffIcon, EyeOpenIcon, LockIcon } from '@assets/icons/custom';
 
 import { PasswordStrengthMeter } from '@components/shared/password-strength-meter';
 
+import { resetPassword } from '@services/user/auth.service';
 import type { ResetPasswordInput } from '@validations/auth.schema';
 import { resetPasswordSchema } from '@validations/auth.schema';
+import { toast } from 'sonner';
+import { ExpiredTokenState } from './expired-token-state';
+import { InlineStrengthBar } from './inline-strength-bar';
+import { RequirementsCard } from './password-requirement-card';
+import { ResetBadge } from './reset-badge-icon';
+import { SuccessState } from './success-state';
 
 // ── Animation Variants ──────────────────────────────────────────
 const containerVariants: Variants = {
@@ -33,191 +40,26 @@ const itemVariants: Variants = {
   },
 };
 
-// ── Inline Strength Bar (desktop design, shown between fields) ──
-interface StrengthBarProps {
-  password: string;
-}
-
-function getStrengthMeta(password: string): {
-  score: number;
-  label: string;
-  percent: number;
-  colorClass: string;
-  textClass: string;
-} {
-  if (!password)
-    return {
-      score: 0,
-      label: '',
-      percent: 0,
-      colorClass: 'bg-border',
-      textClass: 'text-muted-foreground',
-    };
-
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
-
-  const meta = [
-    { label: 'WEAK', percent: 25, colorClass: 'bg-brand-red', textClass: 'text-brand-red' },
-    { label: 'MODERATE', percent: 50, colorClass: 'bg-brand-amber', textClass: 'text-brand-amber' },
-    { label: 'PROFESSIONAL', percent: 75, colorClass: 'bg-brand-sky', textClass: 'text-brand-sky' },
-    {
-      label: 'STRONG',
-      percent: 100,
-      colorClass: 'bg-brand-emerald',
-      textClass: 'text-brand-emerald',
-    },
-  ];
-
-  return { score, ...(meta[score - 1] ?? meta[0]) };
-}
-
-function InlineStrengthBar({ password }: StrengthBarProps): React.JSX.Element {
-  const { label, percent, colorClass, textClass } = getStrengthMeta(password);
-
-  if (!password) return <></>;
-
-  return (
-    <div className="mt-2 space-y-1.5">
-      {/* Label row */}
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
-          Strength: <span className={textClass}>{label}</span>
-        </span>
-        <span className={`text-[11px] font-bold ${textClass}`}>{percent}%</span>
-      </div>
-      {/* Single progress bar */}
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
-        <motion.div
-          className={`h-full rounded-full ${colorClass}`}
-          initial={{ width: 0 }}
-          animate={{ width: `${percent}%` }}
-          transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const }}
-        />
-      </div>
-    </div>
-  );
-}
-
-// ── Requirements Card (desktop) ─────────────────────────────────
-interface Requirement {
-  met: boolean;
-  label: string;
-  badge: string;
-}
-
-function RequirementsCard({ password }: { password: string }): React.JSX.Element {
-  const requirements: Requirement[] = [
-    { met: password.length >= 8, label: 'Minimum 8 characters', badge: 'MIN_8' },
-    { met: /[A-Z]/.test(password), label: 'At least one uppercase letter', badge: 'A-Z' },
-    { met: /[0-9]/.test(password), label: 'Includes at least one number', badge: '0-9' },
-    {
-      met: /[^A-Za-z0-9]/.test(password),
-      label: 'Includes a special character (@, #, $)',
-      badge: '!@#',
-    },
-  ];
-
-  return (
-    <div className="rounded-xl border border-border bg-muted/30 p-4">
-      <p className="mb-3 text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
-        Password Requirements
-      </p>
-      <ul className="space-y-2.5" role="list" aria-label="Password requirements">
-        {requirements.map((req) => (
-          <li key={req.label} className="flex items-center gap-3">
-            {req.met ? (
-              <svg
-                viewBox="0 0 20 20"
-                fill="none"
-                className="size-5 shrink-0 text-brand-emerald"
-                aria-hidden="true"
-              >
-                <circle
-                  cx="10"
-                  cy="10"
-                  r="9"
-                  fill="currentColor"
-                  fillOpacity="0.15"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                />
-                <path
-                  d="M6.5 10.5L9 13L13.5 7.5"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            ) : (
-              <svg
-                viewBox="0 0 20 20"
-                fill="none"
-                className="size-5 shrink-0 text-muted-foreground/40"
-                aria-hidden="true"
-              >
-                <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5" />
-              </svg>
-            )}
-            <span
-              className={`flex-1 text-sm font-medium ${req.met ? 'text-foreground' : 'text-muted-foreground'}`}
-            >
-              {req.label}
-            </span>
-            {/* Badge tag — mobile-style hidden on desktop, shown via responsive class */}
-            <span
-              className={`hidden rounded px-1.5 py-0.5 font-mono text-[10px] font-bold sm:block lg:hidden xl:block ${req.met ? 'bg-brand-emerald/10 text-brand-emerald' : 'bg-muted text-muted-foreground'}`}
-            >
-              {req.badge}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-// ── Mobile reset icon badge ─────────────────────────────────────
-function ResetBadge(): React.JSX.Element {
-  return (
-    <div className="flex size-14 items-center justify-center rounded-2xl bg-muted shadow-sm">
-      <svg viewBox="0 0 32 32" fill="none" className="size-7 text-foreground" aria-hidden="true">
-        <circle cx="16" cy="16" r="9" stroke="currentColor" strokeWidth="1.8" />
-        <path
-          d="M16 10 A6 6 0 1 1 10.5 19"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          fill="none"
-        />
-        <path
-          d="M8 17 L10.5 19.5 L13 17"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-        />
-      </svg>
-    </div>
-  );
+// ── Props ───────────────────────────────────────────────────────
+interface ResetPasswordFormProps {
+  token: string;
 }
 
 // ── Component ───────────────────────────────────────────────────
-export function ResetPasswordForm(): React.JSX.Element {
+export function ResetPasswordForm({ token }: ResetPasswordFormProps): React.JSX.Element {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  // 'idle' | 'success' | 'token_error'
+  type FormState = 'idle' | 'success' | 'token_error';
+  const [formState, setFormState] = useState<FormState>('idle');
 
   const {
     handleSubmit,
     control,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema) as Resolver<ResetPasswordInput>,
     defaultValues: { password: '', confirmPassword: '' },
@@ -225,55 +67,42 @@ export function ResetPasswordForm(): React.JSX.Element {
 
   const passwordValue = watch('password');
 
-  async function onSubmit(data: ResetPasswordInput): Promise<void> {
-    // TODO: replace with useResetPasswordMutation from @queries/use-auth
-    await new Promise((r) => setTimeout(r, 1500));
-    console.log('Reset password payload:', data);
-    setSuccess(true);
+  // ── Token-error state ─────────────────────────────────────
+  if (formState === 'token_error') {
+    return <ExpiredTokenState />;
   }
 
-  // ── Success State ──────────────────────────────────────────
-  if (success) {
-    return (
-      <motion.div
-        className="flex flex-col items-center gap-5 text-center"
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as const }}
-      >
-        <div className="flex size-16 items-center justify-center rounded-2xl bg-brand-emerald/10">
-          <svg
-            viewBox="0 0 32 32"
-            fill="none"
-            className="size-8 text-brand-emerald"
-            aria-hidden="true"
-          >
-            <circle cx="16" cy="16" r="12" stroke="currentColor" strokeWidth="1.8" />
-            <path
-              d="M10 16.5L14 20.5L22 12"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <div className="space-y-2">
-          <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-            Password reset!
-          </h1>
-          <p className="text-[15px] leading-relaxed text-muted-foreground">
-            Your password has been updated successfully. You can now sign in with your new password.
-          </p>
-        </div>
-        <Link
-          href={{ pathname: '/login' }}
-          className="mt-2 inline-flex h-12 w-full items-center justify-center rounded-xl bg-brand-navy text-[15px] font-bold text-white transition-all duration-150 hover:bg-brand-navy/90"
-        >
-          Sign In Now
-        </Link>
-      </motion.div>
-    );
+  // ── Success state ─────────────────────────────────────────
+  if (formState === 'success') {
+    return <SuccessState />;
+  }
+
+  // ── Submit ────────────────────────────────────────────────
+  function onSubmit(data: ResetPasswordInput): void {
+    startTransition(async () => {
+      const result = await resetPassword({
+        token,
+        newPassword: data.password,
+        confirmPassword: data.confirmPassword,
+      });
+
+      if (!result.success) {
+        // Detect expired / invalid token responses from backend
+        const isTokenError =
+          result.message.toLowerCase().includes('invalid') ||
+          result.message.toLowerCase().includes('expired');
+
+        if (isTokenError) {
+          setFormState('token_error');
+          return;
+        }
+
+        toast.error(result.message);
+        return;
+      }
+
+      setFormState('success');
+    });
   }
 
   return (
@@ -299,9 +128,7 @@ export function ResetPasswordForm(): React.JSX.Element {
         </p>
       </motion.div>
 
-      {/* ── Form card ──
-          Bordered card on mobile; flat/transparent on desktop.
-      ── */}
+      {/* ── Form card ── */}
       <motion.div
         variants={itemVariants}
         className="rounded-2xl border border-border bg-card p-5 shadow-card lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none"
@@ -350,7 +177,7 @@ export function ResetPasswordForm(): React.JSX.Element {
                     </button>
                   </div>
 
-                  {/* Desktop: inline strength bar between fields */}
+                  {/* Desktop: inline strength bar */}
                   <div className="hidden lg:block">
                     <InlineStrengthBar password={passwordValue} />
                   </div>
@@ -360,7 +187,7 @@ export function ResetPasswordForm(): React.JSX.Element {
               )}
             />
 
-            {/* ── Confirm New Password ── */}
+            {/* ── Confirm Password ── */}
             <Controller
               name="confirmPassword"
               control={control}
@@ -373,7 +200,7 @@ export function ResetPasswordForm(): React.JSX.Element {
                     Confirm New Password
                   </FieldLabel>
                   <div className="relative">
-                    {/* Shield icon for confirm field matching Figma */}
+                    {/* Shield icon for confirm field */}
                     <svg
                       viewBox="0 0 20 20"
                       fill="none"
@@ -414,7 +241,7 @@ export function ResetPasswordForm(): React.JSX.Element {
               )}
             />
 
-            {/* ── Password Requirements Card ── */}
+            {/* ── Password requirements (shown once user starts typing) ── */}
             {passwordValue && (
               <motion.div
                 initial={{ opacity: 0, y: 6 }}
@@ -426,20 +253,20 @@ export function ResetPasswordForm(): React.JSX.Element {
                   <RequirementsCard password={passwordValue} />
                 </div>
 
-                {/* Mobile: reuse existing PasswordStrengthMeter (segmented bar + criteria) */}
+                {/* Mobile: shared PasswordStrengthMeter (segmented bar + criteria) */}
                 <div className="block lg:hidden">
                   <PasswordStrengthMeter password={passwordValue} />
                 </div>
               </motion.div>
             )}
 
-            {/* ── Submit Button ── */}
+            {/* ── Submit ── */}
             <Button
               type="submit"
-              disabled={isSubmitting}
-              className="mt-1 h-12 w-full cursor-pointer rounded-xl bg-brand-navy text-[15px] font-bold text-white transition-all duration-150 hover:-translate-y-px hover:bg-brand-navy/90 hover:shadow-card active:translate-y-0"
+              disabled={isPending}
+              className="mt-1 h-12 w-full cursor-pointer rounded-xl bg-brand-navy text-[15px] font-bold text-white transition-all duration-150 hover:-translate-y-px hover:bg-brand-navy/90 hover:shadow-card active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {isSubmitting ? (
+              {isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                   Resetting password...
@@ -467,7 +294,7 @@ export function ResetPasswordForm(): React.JSX.Element {
           </FieldGroup>
         </form>
 
-        {/* Mobile: contact support link */}
+        {/* Mobile: contact support */}
         <div className="mt-4 border-t border-border pt-4 lg:hidden">
           <Link
             href={{ pathname: '/help' }}
@@ -493,7 +320,7 @@ export function ResetPasswordForm(): React.JSX.Element {
         </div>
       </motion.div>
 
-      {/* ── Desktop: Back to Sign In link ── */}
+      {/* ── Desktop: Back to Sign In ── */}
       <motion.div variants={itemVariants} className="hidden text-center lg:flex lg:justify-center">
         <Link
           href={{ pathname: '/login' }}
