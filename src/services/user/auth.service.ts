@@ -436,6 +436,7 @@ export async function logoutUser(): Promise<{ success: boolean; message: string 
     await fetch(`${envConfig.serverApiUrl}/auth/user/logout`, {
       method: 'POST',
       cache: 'no-store',
+      credentials: 'include',
     });
   } catch {
     // Continue with client-side cleanup even if backend call fails
