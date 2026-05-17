@@ -3,31 +3,29 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { Controller, useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 import { Button } from '@ui/button';
 import { Checkbox } from '@ui/checkbox';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/field';
 import { Input } from '@ui/input';
 
-// ✅ Schema + types always from @validations — never defined inline
 import type { LoginInput } from '@validations/auth.schema';
 import { loginSchema } from '@validations/auth.schema';
 
-// ✅ Icons always from @assets/icons/custom
 import { EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon } from '@assets/icons/custom';
 
-import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/field';
-import { SocialAuth } from './social-auth';
+import { useAuthStore } from '@lib/store/auth.store';
+import { loginUser } from '@services/user/auth.service';
 
-// ── Animation variants ──────────────────────────────────────────
-// ✅ Typed with Variants, ease as cubic-bezier array (not string)
+/* ── Variants ── */
 const containerVariants: Variants = {
   hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.07 },
-  },
+  visible: { transition: { staggerChildren: 0.06 } },
 };
 
 const itemVariants: Variants = {
@@ -35,58 +33,78 @@ const itemVariants: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.35,
-      ease: [0.25, 0.46, 0.45, 0.94] as const, // easeOut cubic-bezier
-    },
+    transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const },
   },
 };
 
-// ── Component ───────────────────────────────────────────────────
+/* ── Component ── */
 export function LoginForm(): React.JSX.Element {
+  const router = useRouter();
+  const setUser = useAuthStore((s) => s.setUser);
   const [showPassword, setShowPassword] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const {
-    register,
     handleSubmit,
     control,
-    formState: { errors, isSubmitting },
+    setError,
+    formState: { errors },
   } = useForm<LoginInput>({
-    // ✅ Cast resolver to fix optional().default() type mismatch
     resolver: zodResolver(loginSchema) as Resolver<LoginInput>,
     defaultValues: { email: '', password: '', rememberMe: false },
   });
 
-  async function onSubmit(data: LoginInput): Promise<void> {
-    // TODO: replace with useLoginMutation from @queries/use-auth
-    await new Promise((r) => setTimeout(r, 1200));
-    console.log('Login payload:', data);
+  function onSubmit(data: LoginInput): void {
+    startTransition(async () => {
+      const result = await loginUser(data);
+
+      if (!result.success) {
+        // Surface field-level errors (e.g. rate limit with field context)
+        if (result.fieldErrors !== undefined) {
+          result.fieldErrors.forEach(({ field, message }) => {
+            setError(field as keyof LoginInput, { message });
+          });
+        }
+        toast.error(result.message);
+        return;
+      }
+
+      if (result.requires2FA) {
+        // Redirect to 2FA verify with temp token in query param
+        // The tempToken is short-lived (5 min) and used only for OTP validation
+        router.push(`/otp-verify?token=${encodeURIComponent(result.tempToken)}`);
+        return;
+      }
+
+      // Hydrate Zustand store with user data
+      setUser(result.user, 'USER', result.user.subscription?.plan ?? 'FREE');
+
+      toast.success(`Welcome back, ${result.user.profile?.firstName}!`);
+      router.push('/');
+    });
   }
 
   return (
     <motion.div
-      className="flex flex-col gap-6"
+      className="flex flex-col gap-5"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* ── Heading ── */}
-      <motion.div variants={itemVariants} className="space-y-1.5">
+      {/* Heading */}
+      <motion.div variants={itemVariants} className="space-y-1">
         <h1 className="text-3xl leading-none font-extrabold tracking-tight text-foreground lg:text-4xl">
           Welcome back
         </h1>
         <p className="text-[15px] leading-relaxed text-muted-foreground">
-          Enter your credentials to access your account
+          Sign in to your <span className="font-bold text-brand-sky">CareerArch</span> account
         </p>
       </motion.div>
 
-      {/* ── Form card ──
-          Shows as a bordered card on mobile (matching Figma mobile design),
-          invisible/flat on desktop where the split panel provides structure.
-      ── */}
+      {/* Form card */}
       <motion.div
         variants={itemVariants}
-        className="rounded-2xl border border-border bg-card p-6 shadow-card lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none"
+        className="rounded-2xl border border-border bg-card p-5 shadow-card lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none"
       >
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -105,7 +123,7 @@ export function LoginForm(): React.JSX.Element {
                     htmlFor="email"
                     className="text-[11px] font-bold tracking-widest text-foreground/70 uppercase"
                   >
-                    Email address
+                    Email Address
                   </FieldLabel>
                   <div className="relative">
                     <MailIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -113,10 +131,9 @@ export function LoginForm(): React.JSX.Element {
                       {...field}
                       id="email"
                       type="email"
-                      placeholder="name@company.com"
+                      placeholder="john@company.com"
                       autoComplete="email"
                       aria-invalid={!!errors.email}
-                      aria-describedby={errors.email ? 'email-error' : undefined}
                       className="h-11 border-transparent bg-input pl-10 text-[15px] transition-all focus:border-ring focus:bg-background"
                     />
                   </div>
@@ -131,12 +148,20 @@ export function LoginForm(): React.JSX.Element {
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel
-                    htmlFor="password"
-                    className="text-[11px] font-bold tracking-widest text-foreground/70 uppercase"
-                  >
-                    Password
-                  </FieldLabel>
+                  <div className="flex items-center justify-between">
+                    <FieldLabel
+                      htmlFor="password"
+                      className="text-[11px] font-bold tracking-widest text-foreground/70 uppercase"
+                    >
+                      Password
+                    </FieldLabel>
+                    <Link
+                      href={{ pathname: '/forgot-password' }}
+                      className="text-[11px] font-semibold text-brand-sky hover:underline"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
                   <div className="relative">
                     <LockIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -146,9 +171,7 @@ export function LoginForm(): React.JSX.Element {
                       placeholder="••••••••"
                       autoComplete="current-password"
                       aria-invalid={!!errors.password}
-                      aria-describedby={errors.password ? 'password-error' : undefined}
                       className="h-11 border-transparent bg-input pr-11 pl-10 text-[15px] transition-all focus:border-ring focus:bg-background"
-                      {...register('password')}
                     />
                     <button
                       type="button"
@@ -168,47 +191,37 @@ export function LoginForm(): React.JSX.Element {
               )}
             />
 
-            {/* Remember me + Forgot password */}
-            <div className="flex flex-col pt-0.5 sm:flex-row sm:items-center sm:justify-between">
-              <Controller
-                control={control}
-                name="rememberMe"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        id="rememberMe"
-                        checked={field.value}
-                        aria-invalid={fieldState.invalid}
-                        onCheckedChange={field.onChange}
-                        className="border-border data-[state=checked]:border-brand-navy data-[state=checked]:bg-brand-navy data-[state=checked]:text-white"
-                      />
-                      <FieldLabel
-                        htmlFor="rememberMe"
-                        className="cursor-pointer text-sm font-medium text-muted-foreground"
-                      >
-                        Remember me
-                      </FieldLabel>
-                    </div>
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
-              />
-              <Link
-                href={{ pathname: '/forgot-password' }}
-                className="pt-2 text-sm font-bold whitespace-nowrap text-foreground transition-colors hover:text-brand-sky sm:pt-0"
-              >
-                Forgot password?
-              </Link>
-            </div>
+            {/* Remember Me */}
+            <Controller
+              name="rememberMe"
+              control={control}
+              render={({ field }) => (
+                <Field>
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      id="rememberMe"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      className="border-border data-[state=checked]:border-brand-navy data-[state=checked]:bg-brand-navy data-[state=checked]:text-white"
+                    />
+                    <FieldLabel
+                      htmlFor="rememberMe"
+                      className="cursor-pointer text-sm leading-none font-normal text-muted-foreground"
+                    >
+                      Remember me for 30 days
+                    </FieldLabel>
+                  </div>
+                </Field>
+              )}
+            />
 
             {/* Submit */}
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isPending}
               className="mt-1 h-12 w-full cursor-pointer rounded-xl bg-brand-navy text-[15px] font-bold text-white transition-all duration-150 hover:-translate-y-px hover:bg-brand-navy/90 hover:shadow-card active:translate-y-0"
             >
-              {isSubmitting ? (
+              {isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                   Signing in...
@@ -221,21 +234,36 @@ export function LoginForm(): React.JSX.Element {
         </form>
       </motion.div>
 
-      {/* ── Social Auth ── */}
-      <motion.div variants={itemVariants}>
-        <SocialAuth />
-      </motion.div>
-
-      {/* ── Sign up link ── */}
+      {/* Sign up link */}
       <motion.p variants={itemVariants} className="text-center text-sm text-muted-foreground">
         Don&apos;t have an account?{' '}
         <Link
           href={{ pathname: '/register' }}
           className="font-bold text-foreground transition-colors hover:text-brand-sky"
         >
-          Sign up
+          Create one
         </Link>
       </motion.p>
+
+      {/* Employer CTA */}
+      <motion.div variants={itemVariants} className="border-t border-border pt-4">
+        <Link
+          href={{ pathname: '/login-org' }}
+          className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <span>Signing in as an employer?</span>
+          <span className="font-semibold text-foreground">Organization login</span>
+          <svg viewBox="0 0 16 16" fill="none" className="size-3.5 shrink-0" aria-hidden="true">
+            <path
+              d="M3 8H13M9 4L13 8L9 12"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Link>
+      </motion.div>
     </motion.div>
   );
 }
