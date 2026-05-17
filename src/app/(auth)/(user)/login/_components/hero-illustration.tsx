@@ -1,10 +1,10 @@
 export function HeroIllustration() {
   return (
-    <div className="relative w-full max-w-[420px]">
-      <div className="absolute inset-0 rounded-[32px] bg-linear-to-br from-brand-sky/10 to-brand-emerald/10 blur-3xl" />
+    <div className="relative w-full max-w-105">
+      <div className="absolute inset-0 rounded-4xl bg-linear-to-br from-brand-sky/10 to-brand-emerald/10 blur-3xl" />
 
-      <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
-        <div className="h-[320px] rounded-[24px] bg-linear-to-br from-brand-sky/30 to-brand-emerald/20 p-6">
+      <div className="relative overflow-hidden rounded-4xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
+        <div className="h-80 rounded-3xl bg-linear-to-br from-brand-sky/30 to-brand-emerald/20 p-6">
           <div className="flex h-full flex-col justify-between">
             <div className="flex justify-end">
               <div className="flex size-12 items-center justify-center rounded-full border border-white/10 bg-background/10">
