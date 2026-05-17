@@ -58,7 +58,6 @@ api.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       originalRequest._retry !== true &&
-      // Don't retry the refresh endpoint itself
       !originalRequest.url?.includes('refresh-token')
     ) {
       if (isRefreshing) {
@@ -86,11 +85,7 @@ api.interceptors.response.use(
               ? '/auth/admin/refresh-token'
               : '/auth/user/refresh-token';
 
-        await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}${refreshEndpoint}`,
-          {},
-          { withCredentials: true },
-        );
+        await axios.post(`${envConfig.apiUrl}${refreshEndpoint}`, {}, { withCredentials: true });
 
         // Retry original request — new cookie is now set
         const retried = await api(originalRequest);
