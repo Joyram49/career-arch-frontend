@@ -100,6 +100,12 @@ export const otpSchema = z.object({
     .regex(/^\d{6}$/, 'Code must contain only digits'),
 });
 
+/* ======================= Admin login schema =========================== */
+export const adminLoginSchema = z.object({
+  email: z.email('enter a valid email address').toLowerCase().trim(),
+  password: z.string().min(1, 'Password is required'),
+});
+
 /* ======================= Inferred input values =========================== */
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type RegisterOrgInput = z.infer<typeof registerOrgSchema>;
@@ -108,3 +114,4 @@ export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export type OtpInput = z.infer<typeof otpSchema>;
+export type AdminLoginInput = z.infer<typeof adminLoginSchema>;
