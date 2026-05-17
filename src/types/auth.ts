@@ -20,8 +20,6 @@ export interface IJwtPayload {
 export interface IUser {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
   isEmailVerified: boolean;
   isTwoFactorEnabled: boolean;
   isActive: boolean;
@@ -33,6 +31,8 @@ export interface IUser {
 export interface IUserProfile {
   id: string;
   userId: string;
+  firstName: string;
+  lastName: string;
   headline: string | null;
   summary: string | null;
   phone: string | null;

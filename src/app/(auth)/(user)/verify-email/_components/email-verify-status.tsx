@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-import { verifyEmail } from '@services/user/auth';
+import { verifyEmail } from '@services/user/auth.service';
 
 import { EmailVerificationErrorCard } from './email-verification-error-card';
 import { EmailVerificationLoadingCard } from './email-verification-loading-card';

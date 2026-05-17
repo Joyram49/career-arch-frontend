@@ -4,6 +4,7 @@ import { LogoIcon } from '@assets/icons/custom';
 import ContainerLayout from '@components/layout/ContainerLayout';
 import Link from 'next/link';
 import { AuthSidebar } from './_components/auth-sidebar';
+import { InvalidTokenPage } from './_components/invalid-token-page';
 import { ResetPasswordForm } from './_components/reset-password-form';
 
 // ── Metadata ────────────────────────────────────────────────────
@@ -13,8 +14,16 @@ export const metadata: Metadata = {
     'Create a strong new password for your CareerArch account and get back to building your career.',
 };
 
+// ── Page props ──────────────────────────────────────────────────
+interface PageProps {
+  searchParams: Promise<{ token?: string }>;
+}
+
 // ── Page (RSC) ──────────────────────────────────────────────────
-export default function ResetPasswordPage() {
+export default async function ResetPasswordPage({
+  searchParams,
+}: PageProps): Promise<React.JSX.Element> {
+  const { token } = await searchParams;
   return (
     <main className="relative flex min-h-screen overflow-hidden bg-background lg:bg-transparent">
       {/* Full-page dark gradient backdrop (desktop only) */}
@@ -67,16 +76,22 @@ export default function ResetPasswordPage() {
                     CareerArch
                   </span>
                 </Link>
-                {/* Spacer to center logo */}
+                {/* Spacer to keep logo centred */}
                 <div className="size-9" aria-hidden="true" />
               </header>
 
-              {/* Centered form area */}
-              <div className="flex flex-1 flex-col justify-center overflow-y-auto px-5 py-8 sm:px-8 md:px-12 lg:px-14 xl:px-20">
-                <div className="mx-auto w-full max-w-md">
-                  <ResetPasswordForm />
+              {/* ── Main content area ── */}
+              {token !== undefined && token.trim() !== '' ? (
+                /* Valid token — show the form */
+                <div className="flex flex-1 flex-col justify-center overflow-y-auto px-5 py-8 sm:px-8 md:px-12 lg:px-14 xl:px-20">
+                  <div className="mx-auto w-full max-w-md">
+                    <ResetPasswordForm token={token} />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* Missing / empty token — show friendly error */
+                <InvalidTokenPage />
+              )}
 
               {/* Desktop-only footer */}
               <footer className="relative hidden px-14 py-6 lg:flex xl:px-20">

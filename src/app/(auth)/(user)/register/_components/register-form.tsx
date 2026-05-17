@@ -19,7 +19,7 @@ import { registerSchema } from '@validations/auth.schema';
 // ✅ Icons always from @assets/icons/custom
 import { EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon, UserIcon } from '@assets/icons/custom';
 import { PasswordStrengthMeter } from '@components/shared/password-strength-meter';
-import { userRegistration } from '@services/user/auth';
+import { userRegistration } from '@services/user/auth.service';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { SocialAuth } from './social-auth';
