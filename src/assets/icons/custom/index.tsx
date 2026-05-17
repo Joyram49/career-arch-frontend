@@ -198,3 +198,28 @@ export function UserIcon(props: IconProps) {
     </svg>
   );
 }
+
+/**
+ * Shield icon — used on the admin login page.
+ * Always uses currentColor — never hardcoded fill/stroke.
+ */
+export function ShieldIcon(props: IconProps): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path
+        d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 12l2 2 4-4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
