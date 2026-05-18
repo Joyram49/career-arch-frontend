@@ -26,7 +26,7 @@ export interface IApplication {
     IJob,
     'id' | 'slug' | 'title' | 'jobType' | 'isRemote' | 'salaryMin' | 'salaryMax' | 'organization'
   >;
-  user?: Pick<IUser, 'id' | 'firstName' | 'lastName' | 'email' | 'profile'>;
+  user?: Pick<IUser, 'id' | 'email' | 'profile'>;
 }
 
 export interface IApplicationWithDetails extends IApplication {
