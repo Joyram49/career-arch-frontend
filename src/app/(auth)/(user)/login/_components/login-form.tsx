@@ -248,7 +248,7 @@ export function LoginForm(): React.JSX.Element {
       {/* Employer CTA */}
       <motion.div variants={itemVariants} className="border-t border-border pt-4">
         <Link
-          href={{ pathname: '/login-org' }}
+          href={{ pathname: '/org/login' }}
           className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <span>Signing in as an employer?</span>

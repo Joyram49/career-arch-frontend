@@ -12,11 +12,11 @@ import { Checkbox } from '@ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/field';
 import { Input } from '@ui/input';
 
-// ✅ Schema + types always from @validations — never defined inline
+//  Schema + types always from @validations — never defined inline
 import type { RegisterInput } from '@validations/auth.schema';
 import { registerSchema } from '@validations/auth.schema';
 
-// ✅ Icons always from @assets/icons/custom
+//  Icons always from @assets/icons/custom
 import { EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon, UserIcon } from '@assets/icons/custom';
 import { PasswordStrengthMeter } from '@components/shared/password-strength-meter';
 import { userRegistration } from '@services/user/auth.service';
@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { SocialAuth } from './social-auth';
 // ── Animation Variants ──────────────────────────────────────────
-// ✅ Typed Variants, ease as cubic-bezier (not string)
+// Typed Variants, ease as cubic-bezier (not string)
 const containerVariants: Variants = {
   hidden: {},
   visible: {
@@ -59,7 +59,7 @@ export function RegisterForm(): React.JSX.Element {
     setError,
     formState: { errors },
   } = useForm<RegisterInput>({
-    // ✅ Cast resolver — registerSchema has .refine() which can cause type mismatch
+    //  Cast resolver — registerSchema has .refine() which can cause type mismatch
     resolver: zodResolver(registerSchema) as Resolver<RegisterInput>,
     defaultValues: {
       firstName: '',
@@ -391,7 +391,7 @@ export function RegisterForm(): React.JSX.Element {
       {/* ── Employer CTA ── */}
       <motion.div variants={itemVariants} className="border-t border-border pt-4">
         <Link
-          href={{ pathname: '/register-org' }}
+          href={{ pathname: '/org/register' }}
           className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <span>Are you an employer?</span>
