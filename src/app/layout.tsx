@@ -1,6 +1,7 @@
 import { ReactQueryProvider } from '@providers/react-query-provider';
 import type { Metadata, Viewport } from 'next';
 
+import { ModeToggle } from '@components/shared/theme-toggler';
 import { ThemeProvider } from '@providers/theme-provider';
 import { JetBrains_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
@@ -129,6 +130,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }):
               }}
             />
           </ReactQueryProvider>
+          <div className="fixed top-[50%] right-0 hidden lg:block">
+            <ModeToggle />
+          </div>
         </ThemeProvider>
       </body>
     </html>

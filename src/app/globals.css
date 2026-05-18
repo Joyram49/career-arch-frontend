@@ -468,11 +468,15 @@ body {
   background: var(--status-withdrawn-bg);
 }
 
-/* Hero gradient background */
+/* ─────────────────────────────────────────────
+   HERO SECTION
+   ──────────────────────────────────────────── */
+
+/* Main hero background */
 .hero-bg {
   background:
-    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(14, 165, 233, 0.15) 0%, transparent 70%),
-    var(--brand-navy);
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(14, 165, 233, 0.12) 0%, transparent 70%),
+    linear-gradient(160deg, #f8fbff 0%, #eef6ff 35%, #f5f7ff 70%, #ffffff 100%);
 }
 
 [data-theme='dark'] .hero-bg {
@@ -481,10 +485,175 @@ body {
     #070d1a;
 }
 
-/* Dot grid pattern for hero */
+/* Dot grid */
 .dot-grid {
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+[data-theme='dark'] .dot-grid {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+}
+
+/* Ambient glow orbs */
+.hero-orbs {
+  background-image:
+    radial-gradient(ellipse 60% 50% at 20% 60%, rgba(14, 165, 233, 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 35% at 55% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 60%);
+}
+
+[data-theme='dark'] .hero-orbs {
+  background-image:
+    radial-gradient(ellipse 60% 50% at 20% 60%, rgba(14, 165, 233, 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 40% at 80% 30%, rgba(16, 185, 129, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 35% at 55% 80%, rgba(245, 158, 11, 0.06) 0%, transparent 60%);
+}
+
+/* Horizontal beam */
+.hero-beam {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(14, 165, 233, 0.12) 30%,
+    rgba(16, 185, 129, 0.08) 60%,
+    transparent 100%
+  );
+}
+
+[data-theme='dark'] .hero-beam {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(14, 165, 233, 0.15) 30%,
+    rgba(16, 185, 129, 0.1) 60%,
+    transparent 100%
+  );
+}
+
+/* Glass search surfaces */
+.hero-glass {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+[data-theme='dark'] .hero-glass {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Bottom fade */
+.hero-bottom-fade {
+  background: linear-gradient(to bottom, transparent, rgba(248, 250, 252, 0.95));
+}
+
+[data-theme='dark'] .hero-bottom-fade {
+  background: linear-gradient(to bottom, transparent, #0f172a);
+}
+
+/* ─────────────────────────────────────────────
+   HOW IT WORKS SECTION
+   ──────────────────────────────────────────── */
+
+.how-it-works-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(14, 165, 233, 0.08) 0%, transparent 70%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 35%, #eef6ff 100%);
+}
+
+[data-theme='dark'] .how-it-works-bg {
+  background: linear-gradient(160deg, #0a1628 0%, #0d0d1a 100%);
+}
+
+/* Grid overlay */
+.how-it-works-grid {
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+[data-theme='dark'] .how-it-works-grid {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+}
+
+/* Step cards */
+.how-it-works-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+[data-theme='dark'] .how-it-works-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+
+/* Icon container */
+.how-it-works-icon {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+[data-theme='dark'] .how-it-works-icon {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ─────────────────────────────────────────────
+   TESTIMONIALS SECTION
+   ──────────────────────────────────────────── */
+
+.testimonials-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(14, 165, 233, 0.06) 0%, transparent 70%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 50%, #eef6ff 100%);
+}
+
+[data-theme='dark'] .testimonials-bg {
+  background: linear-gradient(160deg, #0a1628 0%, #0d0d1a 100%);
+}
+
+/* grid */
+.testimonials-grid {
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+[data-theme='dark'] .testimonials-grid {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+}
+
+/* card */
+.testimonial-card {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+[data-theme='dark'] .testimonial-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* quote text */
+.testimonial-quote {
+  color: var(--muted-foreground);
+}
+
+[data-theme='dark'] .testimonial-quote {
+  color: #cbd5e1;
+}
+
+/* role text */
+.testimonial-role {
+  color: #64748b;
+}
+
+[data-theme='dark'] .testimonial-role {
+  color: #64748b;
 }
 
 /* Glass card effect */
