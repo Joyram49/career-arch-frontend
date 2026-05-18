@@ -1,20 +1,36 @@
-import ContainerLayout from '@components/layout/ContainerLayout';
-import { ModeToggle } from '@components/shared/theme-toggler';
+import { PublicFooter } from '@components/layout/footer';
+import { PublicNavbar } from '@components/layout/navbar';
+import type { Metadata } from 'next';
+import { FeaturedJobs } from './_components/featured-jobs';
+import { HeroSection } from './_components/hero-section';
+import { HowItWorks } from './_components/how-it-works';
+import { PricingSection } from './_components/pricing-section';
+import { StatsBar } from './_components/stats-bar';
+import { Testimonials } from './_components/testimonials';
 
-export default function HomePage() {
+export const metadata: Metadata = {
+  title: 'CareerArch — Architect the Career You Deserve',
+  description:
+    "Precision matching for elite professionals. Access 50,000+ high-growth opportunities from the world's most innovative firms.",
+  openGraph: {
+    title: 'CareerArch — Architect the Career You Deserve',
+    description:
+      'Precision matching for elite professionals. Access 50,000+ high-growth opportunities.',
+    type: 'website',
+  },
+};
+
+export default function LandingPage(): React.JSX.Element {
   return (
-    <ContainerLayout>
-      <main className="flex min-h-dvh flex-col items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold" style={{ color: 'var(--brand-navy)' }}>
-            CareerArch
-          </h1>
-          <p style={{ color: 'var(--muted-foreground)' }} className="mt-2 text-lg">
-            Phase 4A setup complete — building Phase 4B next.
-          </p>
-        </div>
-        <ModeToggle />
-      </main>
-    </ContainerLayout>
+    <>
+      <PublicNavbar />
+      <HeroSection />
+      <StatsBar />
+      <FeaturedJobs />
+      <HowItWorks />
+      <PricingSection />
+      <Testimonials />
+      <PublicFooter />
+    </>
   );
 }
