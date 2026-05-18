@@ -223,3 +223,122 @@ export function ShieldIcon(props: IconProps): React.JSX.Element {
     </svg>
   );
 }
+
+export function BuildingIcon(props: IconProps): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Building body */}
+      <rect
+        x="4"
+        y="3"
+        width="16"
+        height="18"
+        rx="2"
+        ry="2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Windows */}
+      <path
+        d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+
+      {/* Door */}
+      <path
+        d="M11 21v-4h2v4"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+export function PhoneIcon(props: IconProps): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <path
+        d="M22 16.92v3a2 2 0 0 1-2.18 2
+           19.79 19.79 0 0 1-8.63-3.07
+           19.5 19.5 0 0 1-6-6
+           19.79 19.79 0 0 1-3.07-8.67
+           A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72
+           c.12.9.33 1.78.63 2.63
+           a2 2 0 0 1-.45 2.11L8.09 9.91
+           a16 16 0 0 0 6 6l1.45-1.19
+           a2 2 0 0 1 2.11-.45
+           c.85.3 1.73.51 2.63.63
+           A2 2 0 0 1 22 16.92z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function UsersIcon(props: IconProps): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Main user */}
+      <circle cx="9" cy="8" r="4" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Secondary user */}
+      <path
+        d="M17 11a3 3 0 1 0 0-6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M22 20c0-2.5-1.5-4.5-4-5.3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function GlobeIcon(props: IconProps): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      {/* Outer globe */}
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+
+      {/* Vertical curves */}
+      <path
+        d="M9 3c-2 3-3 6-3 9s1 6 3 9"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M15 3c2 3 3 6 3 9s-1 6-3 9"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+
+      {/* Horizontal lines */}
+      <path d="M3 12h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M5 7.5h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M5 16.5h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}

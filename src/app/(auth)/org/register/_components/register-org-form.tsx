@@ -12,24 +12,16 @@ import { Checkbox } from '@ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/field';
 import { Input } from '@ui/input';
 
-//  Schema + types always from @validations — never defined inline
-import type { RegisterInput } from '@validations/auth.schema';
-import { registerSchema } from '@validations/auth.schema';
+import type { RegisterOrgInput } from '@validations/auth.schema';
+import { registerOrgSchema } from '@validations/auth.schema';
 
-//  Icons always from @assets/icons/custom
-import { EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon, UserIcon } from '@assets/icons/custom';
+import { BuildingIcon, EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon } from '@assets/icons/custom';
+
 import { PasswordStrengthMeter } from '@components/shared/password-strength-meter';
-import { userRegistration } from '@services/user/auth.service';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { SocialAuth } from './social-auth';
-// ── Animation Variants ──────────────────────────────────────────
-// Typed Variants, ease as cubic-bezier (not string)
+
 const containerVariants: Variants = {
   hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.065 },
-  },
+  visible: { transition: { staggerChildren: 0.055 } },
 };
 
 const itemVariants: Variants = {
@@ -37,33 +29,24 @@ const itemVariants: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.35,
-      ease: [0.25, 0.46, 0.45, 0.94] as const,
-    },
+    transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const },
   },
 };
 
-// ── Component ───────────────────────────────────────────────────
-export function RegisterForm(): React.JSX.Element {
+export function RegisterOrgForm(): React.JSX.Element {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const router = useRouter();
+  const [showConfirm, setShowConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const {
     handleSubmit,
     control,
     watch,
-    setError,
     formState: { errors },
-  } = useForm<RegisterInput>({
-    //  Cast resolver — registerSchema has .refine() which can cause type mismatch
-    resolver: zodResolver(registerSchema) as Resolver<RegisterInput>,
+  } = useForm<RegisterOrgInput>({
+    resolver: zodResolver(registerOrgSchema) as Resolver<RegisterOrgInput>,
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      companyName: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -71,28 +54,12 @@ export function RegisterForm(): React.JSX.Element {
     },
   });
 
-  // Watch password value for the strength meter
   const passwordValue = watch('password');
 
-  async function onSubmit(data: RegisterInput): Promise<void> {
+  function onSubmit(data: RegisterOrgInput): void {
     startTransition(async () => {
-      const result = await userRegistration({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password,
-      });
-
-      if (!result.success) {
-        if (result.fieldErrors !== undefined) {
-          result.fieldErrors.forEach(({ field, message }) => {
-            setError(field as keyof RegisterInput, { message });
-          });
-        }
-        toast.error(result.message);
-        return;
-      }
-      router.push(`/send-verify-email?email=${encodeURIComponent(data.email)}&sent=true`);
+      // TODO: implement registerOrg service call in Phase API
+      console.warn('Org registration — API integration pending', data);
     });
   }
 
@@ -103,24 +70,26 @@ export function RegisterForm(): React.JSX.Element {
       initial="hidden"
       animate="visible"
     >
-      {/* ── Heading ── */}
+      {/* Org badge */}
+      <motion.div variants={itemVariants}>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-emerald/20 bg-brand-emerald/8 px-3 py-1 text-[11px] font-semibold text-brand-emerald">
+          <BuildingIcon className="size-3.5 shrink-0" />
+          Organization Registration
+        </span>
+      </motion.div>
+
+      {/* Heading */}
       <motion.div variants={itemVariants} className="space-y-1">
         <h1 className="text-3xl leading-none font-extrabold tracking-tight text-foreground lg:text-4xl">
-          Create your account
+          Register your company
         </h1>
         <p className="text-[15px] leading-relaxed text-muted-foreground">
-          Join <span className="font-bold text-brand-sky">2.4M+</span> professionals today
+          Join <span className="font-bold text-brand-sky">18K+</span> companies already hiring on
+          CareerArch
         </p>
       </motion.div>
 
-      {/* ── Social Auth (OAuth buttons + divider) ── */}
-      <motion.div variants={itemVariants}>
-        <SocialAuth />
-      </motion.div>
-
-      {/* ── Form card ──
-          Bordered card on mobile; flat/transparent on desktop.
-      ── */}
+      {/* Form card */}
       <motion.div
         variants={itemVariants}
         className="rounded-2xl border border-border bg-card p-5 shadow-card lg:border-0 lg:bg-transparent lg:p-0 lg:shadow-none"
@@ -129,86 +98,57 @@ export function RegisterForm(): React.JSX.Element {
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-4"
           noValidate
-          aria-label="Create account form"
+          aria-label="Register organization form"
         >
           <FieldGroup>
-            {/* ── Name Row: First + Last ── */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* First Name */}
-              <Controller
-                name="firstName"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel
-                      htmlFor="firstName"
-                      className="text-[11px] font-bold tracking-widest text-foreground/70 uppercase"
-                    >
-                      First Name
-                    </FieldLabel>
-                    <div className="relative">
-                      <UserIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
-                        {...field}
-                        id="firstName"
-                        type="text"
-                        placeholder="John"
-                        autoComplete="given-name"
-                        aria-invalid={!!errors.firstName}
-                        className="h-11 border-transparent bg-input pl-10 text-[15px] transition-all focus:border-ring focus:bg-background"
-                      />
-                    </div>
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
-              />
-
-              {/* Last Name */}
-              <Controller
-                name="lastName"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel
-                      htmlFor="lastName"
-                      className="text-[11px] font-bold tracking-widest text-foreground/70 uppercase"
-                    >
-                      Last Name
-                    </FieldLabel>
+            {/* Company Name */}
+            <Controller
+              name="companyName"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel
+                    htmlFor="companyName"
+                    className="text-[11px] font-bold tracking-widest text-foreground/70 uppercase"
+                  >
+                    Company Name
+                  </FieldLabel>
+                  <div className="relative">
+                    <BuildingIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       {...field}
-                      id="lastName"
+                      id="companyName"
                       type="text"
-                      placeholder="Doe"
-                      autoComplete="family-name"
-                      aria-invalid={!!errors.lastName}
-                      className="h-11 border-transparent bg-input text-[15px] transition-all focus:border-ring focus:bg-background"
+                      placeholder="Acme Corp"
+                      autoComplete="organization"
+                      aria-invalid={!!errors.companyName}
+                      className="h-11 border-transparent bg-input pl-10 text-[15px] transition-all focus:border-ring focus:bg-background"
                     />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )}
-              />
-            </div>
+                  </div>
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
 
-            {/* ── Email Address ── */}
+            {/* Work Email */}
             <Controller
               name="email"
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel
-                    htmlFor="email"
+                    htmlFor="org-reg-email"
                     className="text-[11px] font-bold tracking-widest text-foreground/70 uppercase"
                   >
-                    Email Address
+                    Work Email
                   </FieldLabel>
                   <div className="relative">
                     <MailIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       {...field}
-                      id="email"
+                      id="org-reg-email"
                       type="email"
-                      placeholder="john@company.com"
+                      placeholder="hr@company.com"
                       autoComplete="email"
                       aria-invalid={!!errors.email}
                       className="h-11 border-transparent bg-input pl-10 text-[15px] transition-all focus:border-ring focus:bg-background"
@@ -219,7 +159,7 @@ export function RegisterForm(): React.JSX.Element {
               )}
             />
 
-            {/* ── Password ── */}
+            {/* Password */}
             <Controller
               name="password"
               control={control}
@@ -227,20 +167,20 @@ export function RegisterForm(): React.JSX.Element {
                 <Field data-invalid={fieldState.invalid}>
                   <div className="flex items-center justify-between">
                     <FieldLabel
-                      htmlFor="password"
+                      htmlFor="org-reg-password"
                       className="text-[11px] font-bold tracking-widest text-foreground/70 uppercase"
                     >
                       Password
                     </FieldLabel>
                     <span className="text-[10px] font-semibold tracking-wider text-muted-foreground/60 uppercase">
-                      Secure Encryption
+                      Min 8 characters
                     </span>
                   </div>
                   <div className="relative">
                     <LockIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       {...field}
-                      id="password"
+                      id="org-reg-password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       autoComplete="new-password"
@@ -260,25 +200,22 @@ export function RegisterForm(): React.JSX.Element {
                       )}
                     </button>
                   </div>
-
-                  {/* Password strength meter — shown inline on desktop, below confirm on mobile */}
                   <div className="hidden sm:block">
                     <PasswordStrengthMeter password={passwordValue} />
                   </div>
-
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
             />
 
-            {/* ── Confirm Password ── */}
+            {/* Confirm Password */}
             <Controller
               name="confirmPassword"
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel
-                    htmlFor="confirmPassword"
+                    htmlFor="org-reg-confirm"
                     className="text-[11px] font-bold tracking-widest text-foreground/70 uppercase"
                   >
                     Confirm Password
@@ -287,8 +224,8 @@ export function RegisterForm(): React.JSX.Element {
                     <LockIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       {...field}
-                      id="confirmPassword"
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      id="org-reg-confirm"
+                      type={showConfirm ? 'text' : 'password'}
                       placeholder="••••••••"
                       autoComplete="new-password"
                       aria-invalid={!!errors.confirmPassword}
@@ -296,13 +233,11 @@ export function RegisterForm(): React.JSX.Element {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword((v) => !v)}
-                      aria-label={
-                        showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'
-                      }
+                      onClick={() => setShowConfirm((v) => !v)}
+                      aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
                       className="absolute top-1/2 right-3.5 -translate-y-1/2 p-0.5 text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                     >
-                      {showConfirmPassword ? (
+                      {showConfirm ? (
                         <EyeOpenIcon className="size-4" />
                       ) : (
                         <EyeOffIcon className="size-4" />
@@ -314,27 +249,27 @@ export function RegisterForm(): React.JSX.Element {
               )}
             />
 
-            {/* Mobile: strength meter shown below confirm password (matches Figma mobile layout) */}
+            {/* Mobile strength meter */}
             <div className="block sm:hidden">
               <PasswordStrengthMeter password={passwordValue} />
             </div>
 
-            {/* ── Accept Terms ── */}
+            {/* Accept terms */}
             <Controller
-              control={control}
               name="acceptTerms"
+              control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <div className="flex items-start gap-3 pt-0.5">
                     <Checkbox
-                      id="acceptTerms"
+                      id="org-acceptTerms"
                       checked={field.value}
                       aria-invalid={fieldState.invalid}
                       onCheckedChange={field.onChange}
                       className="mt-0.5 border-border data-[state=checked]:border-brand-navy data-[state=checked]:bg-brand-navy data-[state=checked]:text-white"
                     />
                     <FieldLabel
-                      htmlFor="acceptTerms"
+                      htmlFor="org-acceptTerms"
                       className="cursor-pointer text-sm leading-relaxed font-normal text-muted-foreground"
                     >
                       I agree to the{' '}
@@ -351,6 +286,7 @@ export function RegisterForm(): React.JSX.Element {
                       >
                         Privacy Policy
                       </Link>
+                      , including employer hiring guidelines
                     </FieldLabel>
                   </div>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -358,7 +294,7 @@ export function RegisterForm(): React.JSX.Element {
               )}
             />
 
-            {/* ── Submit Button ── */}
+            {/* Submit */}
             <Button
               type="submit"
               disabled={isPending}
@@ -370,32 +306,32 @@ export function RegisterForm(): React.JSX.Element {
                   Creating account...
                 </span>
               ) : (
-                'Create Account'
+                'Create Organization Account'
               )}
             </Button>
           </FieldGroup>
         </form>
       </motion.div>
 
-      {/* ── Sign in link ── */}
+      {/* Already registered */}
       <motion.p variants={itemVariants} className="text-center text-sm text-muted-foreground">
         Already have an account?{' '}
         <Link
-          href={{ pathname: '/login' }}
+          href={{ pathname: '/org/login' }}
           className="font-bold text-foreground transition-colors hover:text-brand-sky"
         >
           Sign in
         </Link>
       </motion.p>
 
-      {/* ── Employer CTA ── */}
+      {/* Job seeker CTA */}
       <motion.div variants={itemVariants} className="border-t border-border pt-4">
         <Link
-          href={{ pathname: '/org/register' }}
+          href={{ pathname: '/register' }}
           className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          <span>Are you an employer?</span>
-          <span className="font-semibold text-foreground">Register your company</span>
+          <span>Are you a job seeker?</span>
+          <span className="font-semibold text-foreground">Create a talent account</span>
           <svg viewBox="0 0 16 16" fill="none" className="size-3.5 shrink-0" aria-hidden="true">
             <path
               d="M3 8H13M9 4L13 8L9 12"

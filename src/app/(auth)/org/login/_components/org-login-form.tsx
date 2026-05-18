@@ -3,11 +3,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import type { Resolver } from 'react-hook-form';
 import { Controller, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 
 import { Button } from '@ui/button';
 import { Checkbox } from '@ui/checkbox';
@@ -17,12 +15,9 @@ import { Input } from '@ui/input';
 import type { LoginInput } from '@validations/auth.schema';
 import { loginSchema } from '@validations/auth.schema';
 
-import { EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon } from '@assets/icons/custom';
+import { BuildingIcon, EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon } from '@assets/icons/custom';
 
-import { useAuthStore } from '@lib/store/auth.store';
-import { loginUser } from '@services/user/auth.service';
-
-/* ── Variants ── */
+// ── Animation Variants ──────────────────────────────────────────────
 const containerVariants: Variants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.06 } },
@@ -37,17 +32,14 @@ const itemVariants: Variants = {
   },
 };
 
-/* ── Component ── */
-export function LoginForm(): React.JSX.Element {
-  const router = useRouter();
-  const setUser = useAuthStore((s) => s.setUser);
+// ── Component ────────────────────────────────────────────────────────
+export function LoginOrgForm(): React.JSX.Element {
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const {
     handleSubmit,
     control,
-    setError,
     formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema) as Resolver<LoginInput>,
@@ -56,31 +48,8 @@ export function LoginForm(): React.JSX.Element {
 
   function onSubmit(data: LoginInput): void {
     startTransition(async () => {
-      const result = await loginUser(data);
-
-      if (!result.success) {
-        // Surface field-level errors (e.g. rate limit with field context)
-        if (result.fieldErrors !== undefined) {
-          result.fieldErrors.forEach(({ field, message }) => {
-            setError(field as keyof LoginInput, { message });
-          });
-        }
-        toast.error(result.message);
-        return;
-      }
-
-      if (result.requires2FA) {
-        // Redirect to 2FA verify with temp token in query param
-        // The tempToken is short-lived (5 min) and used only for OTP validation
-        router.push(`/otp-verify?token=${encodeURIComponent(result.tempToken)}`);
-        return;
-      }
-
-      // Hydrate Zustand store with user data
-      setUser(result.user, 'USER', result.user.subscription?.plan ?? 'FREE');
-
-      toast.success(`Welcome back, ${result.user.profile?.firstName}!`);
-      router.push('/');
+      // TODO: Phase API — call loginOrg service
+      console.warn('Org login — API pending', data);
     });
   }
 
@@ -91,13 +60,22 @@ export function LoginForm(): React.JSX.Element {
       initial="hidden"
       animate="visible"
     >
+      {/* Org portal badge */}
+      <motion.div variants={itemVariants}>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-sky/25 bg-brand-sky/8 px-3 py-1 text-[11px] font-semibold text-brand-sky">
+          <BuildingIcon className="size-3.5 shrink-0" />
+          Organization Portal
+        </span>
+      </motion.div>
+
       {/* Heading */}
       <motion.div variants={itemVariants} className="space-y-1">
         <h1 className="text-3xl leading-none font-extrabold tracking-tight text-foreground lg:text-4xl">
           Welcome back
         </h1>
         <p className="text-[15px] leading-relaxed text-muted-foreground">
-          Sign in to your <span className="font-bold text-brand-sky">CareerArch</span> account
+          Sign in to your <span className="font-bold text-brand-sky">employer account</span> to
+          manage your hiring pipeline
         </p>
       </motion.div>
 
@@ -110,28 +88,28 @@ export function LoginForm(): React.JSX.Element {
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-4"
           noValidate
-          aria-label="Sign in form"
+          aria-label="Organization sign in form"
         >
           <FieldGroup>
-            {/* Email */}
+            {/* Work Email */}
             <Controller
               name="email"
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel
-                    htmlFor="email"
+                    htmlFor="org-login-email"
                     className="text-[11px] font-bold tracking-widest text-foreground/70 uppercase"
                   >
-                    Email Address
+                    Work Email
                   </FieldLabel>
                   <div className="relative">
                     <MailIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       {...field}
-                      id="email"
+                      id="org-login-email"
                       type="email"
-                      placeholder="john@company.com"
+                      placeholder="hr@company.com"
                       autoComplete="email"
                       aria-invalid={!!errors.email}
                       className="h-11 border-transparent bg-input pl-10 text-[15px] transition-all focus:border-ring focus:bg-background"
@@ -150,13 +128,13 @@ export function LoginForm(): React.JSX.Element {
                 <Field data-invalid={fieldState.invalid}>
                   <div className="flex items-center justify-between">
                     <FieldLabel
-                      htmlFor="password"
+                      htmlFor="org-login-password"
                       className="text-[11px] font-bold tracking-widest text-foreground/70 uppercase"
                     >
                       Password
                     </FieldLabel>
                     <Link
-                      href={{ pathname: '/forgot-password' }}
+                      href={{ pathname: '/org/forgot-password' }}
                       className="text-[11px] font-semibold text-brand-sky hover:underline"
                     >
                       Forgot password?
@@ -166,7 +144,7 @@ export function LoginForm(): React.JSX.Element {
                     <LockIcon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       {...field}
-                      id="password"
+                      id="org-login-password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="••••••••"
                       autoComplete="current-password"
@@ -191,7 +169,7 @@ export function LoginForm(): React.JSX.Element {
               )}
             />
 
-            {/* Remember Me */}
+            {/* Remember me */}
             <Controller
               name="rememberMe"
               control={control}
@@ -199,16 +177,16 @@ export function LoginForm(): React.JSX.Element {
                 <Field>
                   <div className="flex items-center gap-3">
                     <Checkbox
-                      id="rememberMe"
+                      id="org-rememberMe"
                       checked={field.value}
                       onCheckedChange={field.onChange}
                       className="border-border data-[state=checked]:border-brand-navy data-[state=checked]:bg-brand-navy data-[state=checked]:text-white"
                     />
                     <FieldLabel
-                      htmlFor="rememberMe"
+                      htmlFor="org-rememberMe"
                       className="cursor-pointer text-sm leading-none font-normal text-muted-foreground"
                     >
-                      Remember me for 30 days
+                      Keep me signed in for 30 days
                     </FieldLabel>
                   </div>
                 </Field>
@@ -227,32 +205,32 @@ export function LoginForm(): React.JSX.Element {
                   Signing in...
                 </span>
               ) : (
-                'Sign In'
+                'Sign In to Dashboard'
               )}
             </Button>
           </FieldGroup>
         </form>
       </motion.div>
 
-      {/* Sign up link */}
+      {/* Register org link */}
       <motion.p variants={itemVariants} className="text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{' '}
+        New to CareerArch for employers?{' '}
         <Link
-          href={{ pathname: '/register' }}
+          href={{ pathname: '/org/register' }}
           className="font-bold text-foreground transition-colors hover:text-brand-sky"
         >
-          Create one
+          Register your company
         </Link>
       </motion.p>
 
-      {/* Employer CTA */}
+      {/* Job seeker CTA */}
       <motion.div variants={itemVariants} className="border-t border-border pt-4">
         <Link
-          href={{ pathname: '/org/login' }}
+          href={{ pathname: '/login' }}
           className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          <span>Signing in as an employer?</span>
-          <span className="font-semibold text-foreground">Organization login</span>
+          <span>Looking for a job instead?</span>
+          <span className="font-semibold text-foreground">Job seeker login</span>
           <svg viewBox="0 0 16 16" fill="none" className="size-3.5 shrink-0" aria-hidden="true">
             <path
               d="M3 8H13M9 4L13 8L9 12"

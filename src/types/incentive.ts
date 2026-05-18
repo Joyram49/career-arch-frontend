@@ -26,6 +26,6 @@ export interface IHiringIncentive {
   job?: Pick<IJob, 'id' | 'title'>;
   application?: {
     id: string;
-    user: Pick<IUser, 'id' | 'firstName' | 'lastName' | 'email'>;
+    user: Pick<IUser, 'id' | 'email' | 'profile'>;
   };
 }
