@@ -342,3 +342,278 @@ export function GlobeIcon(props: IconProps): React.JSX.Element {
     </svg>
   );
 }
+
+export function IconOverview(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+export function IconApplications(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <path
+        d="M4 4h12a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V5a1 1 0 011-1z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path d="M7 8h6M7 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+export function IconSaved(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <path
+        d="M5 3h10a1 1 0 011 1v12.5l-6-3-6 3V4a1 1 0 011-1z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+export function IconProfile(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <circle cx="10" cy="7" r="3" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+export function IconSubscription(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <rect x="2" y="5" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M2 9h16" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M6 13h2M10 13h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+export function IconNotification(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <path
+        d="M10 2a6 6 0 016 6v3l1.5 2.5H2.5L4 11V8a6 6 0 016-6z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M8 16.5a2 2 0 004 0" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+export function IconSettings(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <circle cx="10" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M10 2v2M10 16v2M2 10h2M16 10h2M4.22 4.22l1.42 1.42M14.36 14.36l1.42 1.42M4.22 15.78l1.42-1.42M14.36 5.64l1.42-1.42"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+export function IconSignOut(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <path
+        d="M7 3H4a1 1 0 00-1 1v12a1 1 0 001 1h3"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M13 13l4-3-4-3M17 10H8"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+export function IconClose(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <path
+        d="M5 5l10 10M15 5L5 15"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function HamburgerIcon(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <path
+        d="M3 5h14M3 10h14M3 15h14"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+export function BellIcon(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <path
+        d="M10 2a6 6 0 016 6v3l1.5 2.5H2.5L4 11V8a6 6 0 016-6z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M8 16.5a2 2 0 004 0" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+export function ThemeIcon(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <circle cx="10" cy="10" r="3.5" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function CloseIcon(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <path
+        d="M5 5l10 10M15 5L5 15"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+export function DownloadIcon(props: React.SVGProps<SVGSVGElement>): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" {...props}>
+      <path
+        d="M10 3v10M6 9l4 4 4-4"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M3 15h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconSend(): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" className="size-4">
+      <path
+        d="M2 9h14M11 4l5 5-5 5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+export function IconCalendar(): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" className="size-4">
+      <rect x="2" y="3" width="14" height="13" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M6 1.5V4M12 1.5V4M2 7h14"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+export function IconEye(): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" className="size-4">
+      <path
+        d="M1 9C3 5 6 3 9 3s6 2 8 6c-2 4-5 6-8 6s-6-2-8-6z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+export function IconBookmark(): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 18 18" fill="none" className="size-4">
+      <path
+        d="M4 2h10a1 1 0 011 1v12l-6-3-6 3V3a1 1 0 011-1z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function IconView(): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 14 14" fill="none" className="size-3.5">
+      <path
+        d="M1 7c1.5-3 3.5-4.5 6-4.5S11.5 4 13 7c-1.5 3-3.5 4.5-6 4.5S2.5 10 1 7z"
+        stroke="currentColor"
+        strokeWidth="1.3"
+      />
+      <circle cx="7" cy="7" r="2" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
+export function IconBriefcase(): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 14 14" fill="none" className="size-3.5">
+      <rect x="1" y="4.5" width="12" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M5 4.5V3a1 1 0 011-1h2a1 1 0 011 1v1.5" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+export function IconCheck(): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 14 14" fill="none" className="size-3.5">
+      <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.3" />
+      <path
+        d="M4.5 7L6 8.5L9.5 5"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+export function IconCard(): React.JSX.Element {
+  return (
+    <svg viewBox="0 0 14 14" fill="none" className="size-3.5">
+      <rect x="1" y="3" width="12" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M1 6h12" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
