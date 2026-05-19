@@ -4,14 +4,17 @@ import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 
+import { resendVerificationEmail } from '@services/org/auth.service';
 import { Button } from '@ui/button';
 import { Separator } from '@ui/separator';
 import { toast } from 'sonner';
 
+// ── Types ────────────────────────────────────────────────────────
 interface VerifyEmailOrgCardProps {
   email: string;
 }
 
+// ── Animation Variants ────────────────────────────────────────────
 const containerVariants: Variants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
@@ -28,6 +31,7 @@ const itemVariants: Variants = {
 
 const RESEND_COOLDOWN = 60;
 
+// ── Animated Mail Icon ────────────────────────────────────────────
 function BuildingMailIcon(): React.JSX.Element {
   return (
     <div className="relative mx-auto mb-6 flex size-20 items-center justify-center sm:size-24">
@@ -93,6 +97,7 @@ function BuildingMailIcon(): React.JSX.Element {
   );
 }
 
+// ── Countdown Badge ───────────────────────────────────────────────
 function CountdownBadge({ seconds }: { seconds: number }): React.JSX.Element {
   const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
   const ss = String(seconds % 60).padStart(2, '0');
@@ -103,8 +108,10 @@ function CountdownBadge({ seconds }: { seconds: number }): React.JSX.Element {
   );
 }
 
+// ── Main Component ────────────────────────────────────────────────
 export function VerifyEmailOrgCard({ email }: VerifyEmailOrgCardProps): React.JSX.Element {
   const [countdown, setCountdown] = useState(RESEND_COOLDOWN);
+  const [resendCount, setResendCount] = useState(0);
   const [resendSuccess, setResendSuccess] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -134,12 +141,18 @@ export function VerifyEmailOrgCard({ email }: VerifyEmailOrgCardProps): React.JS
     if (countdown > 0 || isPending) return;
     setResendSuccess(false);
     startTransition(async () => {
-      // TODO: Phase API — implement resendVerificationEmailOrg service call
-      console.warn('Org resend verification — API integration pending', email);
-      setResendSuccess(true);
-      startCountdown();
-      toast.success('Verification email resent. Please check your inbox.');
+      const result = await resendVerificationEmail({ email });
+      if (result.success) {
+        setResendSuccess(true);
+        setResendCount((c) => c + 1);
+        startCountdown();
+        toast.success('Verification email resent. Please check your inbox.');
+      } else {
+        toast.error(result.message);
+      }
     });
+
+    // Auto-clear success message after 4s
     setTimeout(() => setResendSuccess(false), 4000);
   }
 
@@ -269,7 +282,7 @@ export function VerifyEmailOrgCard({ email }: VerifyEmailOrgCardProps): React.JS
                 strokeLinejoin="round"
               />
             </svg>
-            Wrong email? Change address
+            {resendCount > 0 ? 'Wrong email? Change email address' : 'Wrong email? Change address'}
           </Link>
         </div>
 
@@ -279,6 +292,43 @@ export function VerifyEmailOrgCard({ email }: VerifyEmailOrgCardProps): React.JS
             Security Protocol V2.4
           </span>
           <div className="h-px flex-1 bg-border" />
+        </div>
+      </motion.div>
+      {/* ── Help Card (mobile only, matches Figma) ── */}
+      <motion.div
+        variants={itemVariants}
+        className="mt-4 rounded-2xl border border-border bg-card p-4 sm:hidden"
+      >
+        <div className="flex items-start gap-3">
+          <div className="bg-brand-emerald-light flex size-8 shrink-0 items-center justify-center rounded-full">
+            <svg
+              viewBox="0 0 20 20"
+              fill="none"
+              className="size-4 text-brand-emerald"
+              aria-hidden="true"
+            >
+              <circle cx="10" cy="10" r="8.5" stroke="currentColor" strokeWidth="1.4" />
+              <path
+                d="M10 9v5M10 7v.5"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-foreground">Need help?</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+              If you&apos;re having trouble, check your spam folder or visit our{' '}
+              <Link
+                href={{ pathname: '/help' }}
+                className="font-semibold text-brand-sky underline-offset-2 hover:underline"
+              >
+                Help Center
+              </Link>{' '}
+              for more info.
+            </p>
+          </div>
         </div>
       </motion.div>
     </motion.div>
