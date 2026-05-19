@@ -18,6 +18,7 @@ import { PasswordStrengthMeter } from '@components/shared/password-strength-mete
 import type { ResetPasswordInput } from '@validations/auth.schema';
 import { resetPasswordSchema } from '@validations/auth.schema';
 
+import { resetPassword } from '@services/org/auth.service';
 import { ExpiredTokenState } from './expired-token-state';
 import { InlineStrengthBar } from './inline-strength-bar';
 import { RequirementsCard } from './password-requirement-card';
@@ -69,9 +70,27 @@ export function ResetPasswordOrgForm({ token }: ResetPasswordOrgFormProps): Reac
 
   function onSubmit(data: ResetPasswordInput): void {
     startTransition(async () => {
-      // TODO: Phase API — call resetPasswordOrg service
-      console.warn('Org reset password — API pending', data, token);
-      toast.error('API integration coming in Phase API');
+      const result = await resetPassword({
+        token,
+        newPassword: data.password,
+        confirmPassword: data.confirmPassword,
+      });
+      if (!result.success) {
+        // Detect expired / invalid token responses from backend
+        const isTokenError =
+          result.message.toLowerCase().includes('invalid') ||
+          result.message.toLowerCase().includes('expired');
+
+        if (isTokenError) {
+          setFormState('token_error');
+          return;
+        }
+
+        toast.error(result.message);
+        return;
+      }
+
+      setFormState('success');
     });
   }
 

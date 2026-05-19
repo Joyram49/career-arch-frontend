@@ -35,7 +35,7 @@ export function ExpiredTokenState(): React.JSX.Element {
 
       <div className="w-full space-y-3">
         <Link
-          href={{ pathname: '/forgot-password-org' }}
+          href={{ pathname: '/org/forgot-password' }}
           className="flex h-12 w-full items-center justify-center rounded-xl bg-brand-navy text-[15px] font-bold text-white transition-all duration-150 hover:-translate-y-px hover:bg-brand-navy/90 hover:shadow-card active:translate-y-0"
         >
           Request a new link

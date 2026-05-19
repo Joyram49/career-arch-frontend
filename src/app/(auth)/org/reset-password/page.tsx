@@ -85,9 +85,36 @@ export default async function ResetPasswordOrgPage({
                 <InvalidTokenPage />
               )}
 
-              {/* Mobile footer */}
+              {/* Desktop-only footer */}
+              <footer className="relative hidden px-14 py-6 lg:flex xl:px-20">
+                <nav className="flex flex-wrap items-center gap-6" aria-label="Footer navigation">
+                  {[
+                    { label: 'Help', href: '/help' },
+                    { label: 'Security Architecture', href: '/security' },
+                    { label: 'Privacy Policy', href: '/privacy' },
+                  ].map(({ label, href }) => (
+                    <Link
+                      key={label}
+                      href={{ pathname: href }}
+                      className="text-[10px] font-bold tracking-widest text-muted-foreground/60 uppercase transition-colors hover:text-muted-foreground"
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </nav>
+              </footer>
+
+              {/* Mobile only footer */}
               <footer className="relative flex flex-col items-center gap-4 px-5 py-8 lg:hidden">
                 <div className="absolute top-0 left-1/2 h-px w-screen -translate-x-1/2 bg-border" />
+                <div className="flex items-center gap-2">
+                  <div className="flex size-7 items-center justify-center rounded-lg bg-brand-navy">
+                    <LogoIcon className="size-3.5 text-white" />
+                  </div>
+                  <span className="text-sm font-bold tracking-tight text-foreground">
+                    CareerArch
+                  </span>
+                </div>
                 <p className="text-center text-xs text-muted-foreground">
                   &copy; {new Date().getFullYear()} CareerArch. Precision in Professional Growth.
                 </p>
@@ -95,7 +122,7 @@ export default async function ResetPasswordOrgPage({
                   className="flex flex-wrap items-center justify-center gap-4"
                   aria-label="Footer navigation"
                 >
-                  {['Privacy Policy', 'Terms of Service', 'Help Center'].map((item) => (
+                  {['Privacy Policy', 'Terms of Service', 'Security', 'Help Center'].map((item) => (
                     <Link
                       key={item}
                       href={{ pathname: `/${item.toLowerCase().replace(/\s+/g, '-')}` }}
