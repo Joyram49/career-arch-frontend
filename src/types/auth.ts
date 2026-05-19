@@ -39,7 +39,8 @@ export interface IUserProfile {
   location: string | null;
   avatarUrl: string | null;
   resumeUrl: string | null;
-  portFolioUrl: string | null;
+  portfolioUrl: string | null;
+  linkedinUrl: string | null;
   resumeFileName: string | null;
   githubUrl: string | null;
   skills: string[];
