@@ -16,6 +16,7 @@ import { MailIcon } from '@assets/icons/custom';
 import type { ForgotPasswordInput } from '@validations/auth.schema';
 import { forgotPasswordSchema } from '@validations/auth.schema';
 
+import { forgotPassword } from '@services/org/auth.service';
 import { ResetIconBadge } from './reset-icon-badge';
 import { SuccessState } from './success-state';
 
@@ -56,9 +57,12 @@ export function ForgotPasswordOrgForm(): React.JSX.Element {
 
   function onSubmit(data: ForgotPasswordInput): void {
     startTransition(async () => {
-      // TODO: Phase API — call forgotPasswordOrg service
-      console.warn('Org forgot password — API pending', data);
-      toast.error('API integration coming in Phase API');
+      const result = await forgotPassword({ email: data.email });
+
+      if (!result.success) {
+        toast.error(result.message);
+        return;
+      }
     });
   }
 
