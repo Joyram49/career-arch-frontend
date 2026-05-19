@@ -35,6 +35,7 @@
       "@constants/*": ["./src/constants/*"],
       "@utils/*": ["./src/utils/"],
       "@assets/*": ["./src/assets/*"],
+      "@queries/*": ["./src/queries/*"],
       "@/*": ["./src/*"]
     }
   },
