@@ -18,6 +18,10 @@ import { registerOrgSchema } from '@validations/auth.schema';
 import { BuildingIcon, EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon } from '@assets/icons/custom';
 
 import { PasswordStrengthMeter } from '@components/shared/password-strength-meter';
+import { orgRegistration } from '@services/org/auth.service';
+import { Route } from 'next';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const containerVariants: Variants = {
   hidden: {},
@@ -36,12 +40,15 @@ const itemVariants: Variants = {
 export function RegisterOrgForm(): React.JSX.Element {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const {
     handleSubmit,
     control,
     watch,
+    setError,
     formState: { errors },
   } = useForm<RegisterOrgInput>({
     resolver: zodResolver(registerOrgSchema) as Resolver<RegisterOrgInput>,
@@ -58,8 +65,29 @@ export function RegisterOrgForm(): React.JSX.Element {
 
   function onSubmit(data: RegisterOrgInput): void {
     startTransition(async () => {
-      // TODO: implement registerOrg service call in Phase API
-      console.warn('Org registration — API integration pending', data);
+      const result = await orgRegistration({
+        companyName: data.companyName,
+        email: data.email,
+        password: data.password,
+      });
+
+      if (!result.success) {
+        if (result.fieldErrors !== undefined) {
+          result.fieldErrors.forEach(({ field, message }) => {
+            setError(field as keyof RegisterOrgInput, { message });
+          });
+        }
+        toast.error(result.message);
+        return;
+      }
+      const params = new URLSearchParams({
+        email: data.email,
+        sent: 'true',
+      });
+
+      const href = `/org/send-verify-email?${params.toString()}` as Route;
+
+      router.push(href);
     });
   }
 
