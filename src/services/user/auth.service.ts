@@ -1,6 +1,7 @@
 'use server';
 import { IUser } from '@app-types/auth';
 import { envConfig } from '@config/envConfig';
+import api from '@lib/axios';
 import { LoginInput, RegisterInput } from '@validations/auth.schema';
 import { cookies } from 'next/headers';
 
@@ -449,4 +450,13 @@ export async function logoutUser(): Promise<{ success: boolean; message: string 
   cookieStore.delete('userRole');
 
   return { success: true, message: 'Logged out successfully' };
+}
+
+export async function refreshToken(): Promise<void> {
+  await api.post('/auth/user/refresh-token');
+}
+
+export async function getMe() {
+  const { data } = await api.get('/auth/user/me');
+  return data.data;
 }

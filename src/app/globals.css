@@ -469,7 +469,7 @@ body {
 }
 
 /* ─────────────────────────────────────────────
-   HERO SECTION
+   HOME HERO SECTION
    ──────────────────────────────────────────── */
 
 /* Main hero background */
@@ -735,7 +735,7 @@ body {
 }
 
 /* ─────────────────────────────────────────────
-   DASHBOARD LAYOUT HELPERS
+   GLOBAL DASHBOARD LAYOUT HELPERS
    ──────────────────────────────────────────── */
 
 /* Sidebar width token */
@@ -783,6 +783,335 @@ body {
   .dashboard-main {
     margin-left: 0;
   }
+}
+
+/* ─────────────────────────────────────────────
+   USER DASHBOARD — Stat Cards
+   ──────────────────────────────────────────── */
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.stat-card-accent {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 0 var(--radius-xl) 0 100%;
+  opacity: 0.06;
+}
+
+[data-theme='dark'] .stat-card-accent {
+  opacity: 0.1;
+}
+
+/* ─────────────────────────────────────────────
+     USER DASHBOARD — Application Pipeline (Kanban)
+     ──────────────────────────────────────────── */
+.pipeline-column {
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  min-width: 180px;
+  flex: 1;
+  padding: 0.875rem;
+}
+
+[data-theme='dark'] .pipeline-column {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pipeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.pipeline-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: var(--shadow-sm);
+}
+
+.pipeline-job-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition:
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.pipeline-job-card:hover {
+  box-shadow: var(--shadow-card);
+  border-color: var(--brand-sky);
+}
+
+/* ─────────────────────────────────────────────
+     USER DASHBOARD — Activity Feed
+     ──────────────────────────────────────────── */
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+  transition: background-color var(--transition-fast);
+}
+
+.activity-item:last-child {
+  border-bottom: none;
+}
+
+.activity-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────
+     USER DASHBOARD — Welcome Banner
+     ──────────────────────────────────────────── */
+.welcome-banner {
+  background: linear-gradient(135deg, var(--brand-navy) 0%, #1e2d4a 60%, #162444 100%);
+  border-radius: var(--radius-2xl);
+  padding: 1.75rem 2rem;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+[data-theme='dark'] .welcome-banner {
+  background: linear-gradient(135deg, #0a1628 0%, #111827 60%, #0d1f3c 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.welcome-banner-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────
+     USER DASHBOARD — Header
+     ──────────────────────────────────────────── */
+.dashboard-header-bar {
+  height: var(--header-height);
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+[data-theme='dark'] .dashboard-header-bar {
+  background: rgba(17, 24, 39, 0.9);
+}
+
+/* ─────────────────────────────────────────────
+     USER DASHBOARD — Mobile Overlay
+     ──────────────────────────────────────────── */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: calc(var(--z-sticky) - 1);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* ─────────────────────────────────────────────
+     USER DASHBOARD — Application Table Row
+     ──────────────────────────────────────────── */
+.app-table-row {
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+  cursor: pointer;
+}
+
+.app-table-row:hover {
+  background-color: var(--muted);
+}
+
+/* ─────────────────────────────────────────────
+     USER DASHBOARD — Application Drawer
+     ──────────────────────────────────────────── */
+.status-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.status-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.status-step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
+  z-index: 1;
+  transition:
+    border-color var(--transition-base),
+    background-color var(--transition-base),
+    color var(--transition-base);
+}
+
+.status-step-dot.active {
+  border-color: var(--brand-sky);
+  background: var(--brand-sky);
+  color: white;
+}
+
+.status-step-dot.complete {
+  border-color: var(--brand-emerald);
+  background: var(--brand-emerald);
+  color: white;
+}
+
+.status-step-line {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.status-step-line.complete {
+  background: var(--brand-emerald);
+}
+
+/* ─────────────────────────────────────────────
+     USER DASHBOARD — Profile Page
+     ──────────────────────────────────────────── */
+.profile-preview-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  position: sticky;
+  top: calc(var(--header-height) + 1.5rem);
+}
+
+.profile-banner {
+  height: 100px;
+  background: linear-gradient(135deg, var(--brand-navy) 0%, #0369a1 100%);
+}
+
+[data-theme='dark'] .profile-banner {
+  background: linear-gradient(135deg, #0a1628 0%, #0c233a 100%);
+}
+
+/* ─────────────────────────────────────────────
+     USER DASHBOARD — Subscription Page
+     ──────────────────────────────────────────── */
+.current-plan-card {
+  background: linear-gradient(135deg, var(--brand-navy) 0%, #1e3254 60%, #162444 100%);
+  border-radius: var(--radius-2xl);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+[data-theme='dark'] .current-plan-card {
+  background: linear-gradient(135deg, #0a1628 0%, #0d1f3c 100%);
+}
+
+.plan-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────
+     USER DASHBOARD — Saved Jobs Card
+     ──────────────────────────────────────────── */
+.saved-job-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  transition:
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.saved-job-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+/* ─────────────────────────────────────────────
+     USER DASHBOARD — Notification Dot
+     ──────────────────────────────────────────── */
+.notif-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-red);
+  border: 2px solid var(--sidebar);
 }
 
 /* ─────────────────────────────────────────────
