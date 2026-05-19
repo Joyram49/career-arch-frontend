@@ -15,6 +15,8 @@ interface IRegisterErrorResult {
   fieldErrors?: Array<{ field: string; message: string }>;
 }
 
+export type RegisterResult = IRegisterSuccessResult | IRegisterErrorResult;
+
 interface ILoginSuccessResult {
   success: true;
   requires2FA: false;
@@ -34,8 +36,6 @@ interface ILoginErrorResult {
 }
 
 export type LoginResult = ILoginSuccessResult | ITwoFaRequiredResult | ILoginErrorResult;
-
-export type RegisterResult = IRegisterSuccessResult | IRegisterErrorResult;
 
 /* ─────────────────────────────────────────────
    registerUser — Server Action
