@@ -1,7 +1,7 @@
 'use server';
-import { IUser } from '@app-types/auth';
+import { IOrganization } from '@app-types/auth';
 import { envConfig } from '@config/envConfig';
-import { LoginInput, RegisterInput } from '@validations/auth.schema';
+import { LoginInput, RegisterOrgInput } from '@validations/auth.schema';
 import { cookies } from 'next/headers';
 
 interface IRegisterSuccessResult {
@@ -20,7 +20,7 @@ export type RegisterResult = IRegisterSuccessResult | IRegisterErrorResult;
 interface ILoginSuccessResult {
   success: true;
   requires2FA: false;
-  user: IUser;
+  org: IOrganization;
 }
 
 interface ITwoFaRequiredResult {
@@ -38,39 +38,34 @@ interface ILoginErrorResult {
 export type LoginResult = ILoginSuccessResult | ITwoFaRequiredResult | ILoginErrorResult;
 
 /* ─────────────────────────────────────────────
-   registerUser — Server Action
-   Calls POST /auth/user/register
+   registerOrg — Server Action
+   Calls POST /auth/org/register
    No cookies set — backend only sends a verification email.
-   On success the user must check their inbox before they can log in.
+   On success the org must check their inbox before they can log in.
    ──────────────────────────────────────────── */
 
-export async function userRegistration(
-  payload: Pick<RegisterInput, 'firstName' | 'lastName' | 'email' | 'password'>,
+export async function orgRegistration(
+  payload: Pick<RegisterOrgInput, 'companyName' | 'email' | 'password'>,
 ): Promise<RegisterResult> {
   let response: Response;
-
   //   send api request to the backend
   try {
-    response = await fetch(`${envConfig.serverApiUrl}/auth/user/register`, {
+    response = await fetch(`${envConfig.serverApiUrl}/auth/org/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        firstName: payload.firstName,
-        lastName: payload.lastName,
-        email: payload.email,
-        password: payload.password,
-      }),
+      body: JSON.stringify(payload),
       cache: 'no-store',
     });
   } catch {
     return {
       success: false,
-      message: 'Unable to reach the server. Please check your connection and try again.',
+      message: 'Unable to reach the server. Please check your internet connections',
     };
   }
 
+  //   parse result body
   let body: {
     success: boolean;
     message: string;
@@ -78,10 +73,10 @@ export async function userRegistration(
   };
   try {
     body = await response.json();
-  } catch (error) {
+  } catch {
     return {
       success: false,
-      message: 'Unexpected server response. Please try again.',
+      message: 'Unexpected server response. Please try again later.',
     };
   }
 
@@ -89,12 +84,12 @@ export async function userRegistration(
   if (!response.ok) {
     return {
       success: false,
-      message: body.message ?? 'Registration failed. Please try again later',
+      message: body.message ?? 'Registration failed. Please try again later.',
       fieldErrors: body.errors,
     };
   }
 
-  // send success response to the client
+  //   send success response to the client
   return {
     success: true,
     message: body.message,
@@ -103,17 +98,18 @@ export async function userRegistration(
 
 /* ─────────────────────────────────────────────
    resendVerification — Server Action
-   Calls POST /auth/user/resend-verification
+   Calls POST /auth/org/resend-verification
     backend will sends a verification email.
-   On success the user have to redirect with the url they will find in email
+   On success the org  have to redirect with the url they will find in email
    ──────────────────────────────────────────── */
+
 export async function resendVerificationEmail(
-  payload: Pick<RegisterInput, 'email'>,
+  payload: Pick<RegisterOrgInput, 'email'>,
 ): Promise<RegisterResult> {
   let response: Response;
   //   send api request to the backend
   try {
-    response = await fetch(`${envConfig.serverApiUrl}/auth/user/resend-verification`, {
+    response = await fetch(`${envConfig.serverApiUrl}/auth/org/resend-verification`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -162,16 +158,15 @@ export async function resendVerificationEmail(
 
 /* ─────────────────────────────────────────────
    verifyEmail — Server Action
-   Calls POST /auth/user/verify-email
+   Calls POST /auth/org/verify-email
     backend will receive token to verify email.
-   On success the user can login their account
+   On success the org can login their account
    ──────────────────────────────────────────── */
-
 export async function verifyEmail(payload: { token: string }): Promise<RegisterResult> {
   let response: Response;
 
   try {
-    const url = new URL(`${envConfig.serverApiUrl}/auth/user/verify-email`);
+    const url = new URL(`${envConfig.serverApiUrl}/auth/org/verify-email`);
     url.searchParams.set('token', payload.token);
 
     response = await fetch(url.toString(), {
@@ -216,7 +211,7 @@ export async function verifyEmail(payload: { token: string }): Promise<RegisterR
 
 /* ─────────────────────────────────────────────
    forgotPassword — Server Action
-   Calls POST /auth/user/forgot-password
+   Calls POST /auth/org/forgot-password
    Backend sends a password-reset email if the address is found.
    Always returns a generic message (prevents email enumeration).
    ──────────────────────────────────────────── */
@@ -224,7 +219,7 @@ export async function forgotPassword(payload: { email: string }): Promise<Regist
   let response: Response;
 
   try {
-    response = await fetch(`${envConfig.serverApiUrl}/auth/user/forgot-password`, {
+    response = await fetch(`${envConfig.serverApiUrl}/auth/org/forgot-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: payload.email }),
@@ -262,10 +257,10 @@ export async function forgotPassword(payload: { email: string }): Promise<Regist
 
 /* ─────────────────────────────────────────────
    resetPassword — Server Action
-   Calls POST /auth/user/reset-password
+   Calls POST /auth/org/reset-password
    Requires the one-time token from the reset email (URL search param),
    plus the new password and confirmation.
-   On success the user must sign in with the new password.
+   On success the org must sign in with the new password.
    ──────────────────────────────────────────── */
 export async function resetPassword(payload: {
   token: string;
@@ -275,7 +270,7 @@ export async function resetPassword(payload: {
   let response: Response;
 
   try {
-    response = await fetch(`${envConfig.serverApiUrl}/auth/user/reset-password`, {
+    response = await fetch(`${envConfig.serverApiUrl}/auth/org/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -316,8 +311,8 @@ export async function resetPassword(payload: {
 }
 
 /* ─────────────────────────────────────────────
-   loginUser — Server Action
-   Calls POST /auth/user/login
+   loginOrg — Server Action
+   Calls POST /auth/org/login
    Backend sets HttpOnly accessToken + refreshToken cookies.
    We set a readable `userRole` cookie so proxy.ts can guard routes.
    ──────────────────────────────────────────── */
@@ -329,7 +324,7 @@ export async function loginUser(input: LoginInput): Promise<LoginResult> {
     // withCredentials equivalent in server actions: we pass Cookie header
     // from the incoming request so the backend can rotate tokens if needed.
     // For login, no existing cookie is needed — backend creates fresh ones.
-    response = await fetch(`${envConfig.serverApiUrl}/auth/user/login`, {
+    response = await fetch(`${envConfig.serverApiUrl}/auth/org/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -355,7 +350,7 @@ export async function loginUser(input: LoginInput): Promise<LoginResult> {
     success: boolean;
     message: string;
     data?: {
-      user?: IUser;
+      organization?: IOrganization;
       accessToken?: string;
       requires2FA?: boolean;
       tempToken?: string;
@@ -388,7 +383,7 @@ export async function loginUser(input: LoginInput): Promise<LoginResult> {
   }
 
   /* ── Full login success ── */
-  if (body.data?.user === undefined) {
+  if (body.data?.organization === undefined) {
     return { success: false, message: 'Unexpected server response.' };
   }
 
@@ -407,7 +402,7 @@ export async function loginUser(input: LoginInput): Promise<LoginResult> {
   const cookieStore = await cookies();
 
   // Set readable role cookie for proxy.ts route guards
-  cookieStore.set('userRole', 'USER', {
+  cookieStore.set('userRole', 'ORGANIZATION', {
     httpOnly: false, // Must be readable by proxy.ts (middleware)
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
@@ -418,22 +413,21 @@ export async function loginUser(input: LoginInput): Promise<LoginResult> {
   return {
     success: true,
     requires2FA: false,
-    user: body.data.user,
+    org: body.data.organization,
   };
 }
 
 /* ─────────────────────────────────────────────
-   logoutUser — Server Action
-   Calls POST /auth/user/logout
+   logoutOrg — Server Action
+   Calls POST /auth/org/logout
    Backend sets HttpOnly accessToken + refreshToken cookies + userRole we added manually. so we had to remove all of these from cookies
    ──────────────────────────────────────────── */
 
-// src/services/user/auth.ts (add this function)
 export async function logoutUser(): Promise<{ success: boolean; message: string }> {
   try {
     // Tell Express to blacklist JTI + revoke refresh token in DB
     // accessToken HttpOnly cookie is auto-forwarded by Next.js proxy
-    await fetch(`${envConfig.serverApiUrl}/auth/user/logout`, {
+    await fetch(`${envConfig.serverApiUrl}/auth/org/logout`, {
       method: 'POST',
       cache: 'no-store',
       credentials: 'include',

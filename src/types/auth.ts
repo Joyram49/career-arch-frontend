@@ -61,7 +61,6 @@ export interface IUserSubscription {
 export interface IOrganization {
   id: string;
   email: string;
-  companyName: string;
   isEmailVerified: boolean;
   isApproved: boolean;
   isActive: boolean;
@@ -69,12 +68,13 @@ export interface IOrganization {
   hasUnpaidIncentives: boolean;
   isTwoFactorEnabled: boolean;
   createdAt: string;
-  profile: string | null;
+  profile: IOrgProfile;
 }
 
 export interface IOrgProfile {
   id: string;
   orgId: string;
+  companyName: string;
   description: string | null;
   logoUrl: string | null;
   bannerUrl: string | null;

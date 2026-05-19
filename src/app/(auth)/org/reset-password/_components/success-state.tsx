@@ -67,7 +67,7 @@ export function SuccessState(): React.JSX.Element {
       </div>
 
       <Link
-        href={{ pathname: '/login-org' }}
+        href={{ pathname: '/org/login' }}
         className="mt-1 flex h-12 w-full items-center justify-center rounded-xl bg-brand-navy text-[15px] font-bold text-white transition-all duration-150 hover:-translate-y-px hover:bg-brand-navy/90 hover:shadow-card active:translate-y-0"
       >
         Sign In to Dashboard

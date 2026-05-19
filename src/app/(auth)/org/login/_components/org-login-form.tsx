@@ -16,6 +16,10 @@ import type { LoginInput } from '@validations/auth.schema';
 import { loginSchema } from '@validations/auth.schema';
 
 import { BuildingIcon, EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon } from '@assets/icons/custom';
+import { useAuthStore } from '@lib/store/auth.store';
+import { loginUser } from '@services/org/auth.service';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 // ── Animation Variants ──────────────────────────────────────────────
 const containerVariants: Variants = {
@@ -36,10 +40,13 @@ const itemVariants: Variants = {
 export function LoginOrgForm(): React.JSX.Element {
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const setUser = useAuthStore((s) => s.setUser);
 
   const {
     handleSubmit,
     control,
+    setError,
     formState: { errors },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema) as Resolver<LoginInput>,
@@ -48,8 +55,31 @@ export function LoginOrgForm(): React.JSX.Element {
 
   function onSubmit(data: LoginInput): void {
     startTransition(async () => {
-      // TODO: Phase API — call loginOrg service
-      console.warn('Org login — API pending', data);
+      const result = await loginUser(data);
+
+      if (!result.success) {
+        // Surface field-level errors (e.g. rate limit with field context)
+        if (result.fieldErrors !== undefined) {
+          result.fieldErrors.forEach(({ field, message }) => {
+            setError(field as keyof LoginInput, { message });
+          });
+        }
+        toast.error(result.message);
+        return;
+      }
+
+      if (result.requires2FA) {
+        // Redirect to 2FA verify with temp token in query param
+        // The tempToken is short-lived (5 min) and used only for OTP validation
+        router.push(`/otp-verify?token=${encodeURIComponent(result.tempToken)}`);
+        return;
+      }
+
+      // Hydrate Zustand store with org data
+      setUser(result.org, 'ORGANIZATION');
+
+      toast.success(`Welcome back, ${result.org.profile.companyName}!`);
+      router.push('/');
     });
   }
 

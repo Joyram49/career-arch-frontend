@@ -147,7 +147,6 @@ export function VerifyEmailCard({ email }: VerifyEmailCardProps): React.JSX.Elem
   async function handleResend(): Promise<void> {
     if (countdown > 0 || isPending || email === undefined) return;
     setResendSuccess(false);
-    // TODO: replace with actual resend API call — services/auth.service.ts
     startTransition(async () => {
       const result = await resendVerificationEmail({ email });
       if (result.success) {

@@ -63,9 +63,6 @@ export function ForgotPasswordForm(): React.JSX.Element {
         toast.error(result.message);
         return;
       }
-
-      // isSubmitSuccessful becomes true — triggers success state above
-      // (react-hook-form sets it after handleSubmit resolves without throwing)
     });
   }
 

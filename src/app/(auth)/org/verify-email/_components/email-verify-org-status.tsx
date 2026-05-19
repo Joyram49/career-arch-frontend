@@ -1,5 +1,6 @@
 'use client';
 
+import { verifyEmail } from '@services/org/auth.service';
 import { useEffect, useState } from 'react';
 import { EmailVerificationErrorCard } from './email-verification-error-card';
 import { EmailVerificationLoadingCard } from './email-verification-loading-card';
@@ -21,10 +22,15 @@ export function EmailVerifyOrgStatus({ token }: Props): React.JSX.Element {
         setMessage('Verification token is missing or invalid.');
         return;
       }
-      // TODO: Phase API — implement verifyEmailOrg service call
-      // Simulating for now
-      await new Promise((r) => setTimeout(r, 800));
-      console.warn('Org email verification — API integration pending', token);
+      const result = await verifyEmail({
+        token,
+      });
+
+      if (!result.success) {
+        setStatus('error');
+        setMessage(result.message);
+        return;
+      }
       setStatus('success');
     }
     void executeVerification();
