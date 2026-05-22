@@ -1,7 +1,7 @@
 'use server';
 import { IUser } from '@app-types/auth';
 import { envConfig } from '@config/envConfig';
-import api from '@lib/axios';
+import client from '@lib/axios/client';
 import { LoginInput, RegisterInput } from '@validations/auth.schema';
 import { cookies } from 'next/headers';
 
@@ -405,15 +405,55 @@ export async function loginUser(input: LoginInput): Promise<LoginResult> {
    * (career-arch.onrender.com), we need to manually forward the Set-Cookie
    * headers to the browser response.
    */
+  // ✅ Forward the backend's HttpOnly cookies to the browser
   const cookieStore = await cookies();
+  const setCookieHeaders = response.headers.getSetCookie?.() ?? [];
 
-  // Set readable role cookie for proxy.ts route guards
+  for (const rawCookie of setCookieHeaders) {
+    const [nameValue, ...attributes] = rawCookie.split(';').map((s) => s.trim());
+    if (!nameValue) continue;
+
+    const eqIdx = nameValue.indexOf('=');
+    const name = nameValue.slice(0, eqIdx);
+    const value = nameValue.slice(eqIdx + 1);
+
+    const attrMap: Record<string, string | boolean> = {};
+    for (const attr of attributes) {
+      const [k, v] = attr.split('=').map((s) => s.trim());
+      if (!k) continue;
+      attrMap[k.toLowerCase()] = v ?? true;
+    }
+
+    cookieStore.set(name, value, {
+      httpOnly: attrMap['httponly'] === true,
+      secure: attrMap['secure'] === true,
+      sameSite: (attrMap['samesite'] as 'strict' | 'lax' | 'none') ?? 'lax',
+      path: (attrMap['path'] as string) ?? '/',
+      maxAge:
+        attrMap['max-age'] !== undefined
+          ? parseInt(attrMap['max-age'] as string, 10)
+          : 7 * 24 * 60 * 60,
+    });
+  }
+
+  // Set readable role cookie for proxy.ts
   cookieStore.set('userRole', 'USER', {
-    httpOnly: false, // Must be readable by proxy.ts (middleware)
+    httpOnly: false,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
+    maxAge: 60 * 60 * 24 * 30,
+  });
+
+  const isRemembered = input.rememberMe ? 'true' : 'false';
+
+  // Set readable role cookie for proxy.ts
+  cookieStore.set('remember_me', isRemembered, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30,
   });
 
   return {
@@ -445,18 +485,19 @@ export async function logoutUser(): Promise<{ success: boolean; message: string 
 
   // Clear all 3 cookies
   const cookieStore = await cookies();
-  cookieStore.delete('accessToken');
-  cookieStore.delete('refreshToken');
+  cookieStore.delete('access_token');
+  cookieStore.delete('refresh_token');
+  cookieStore.delete('remember_me');
   cookieStore.delete('userRole');
 
   return { success: true, message: 'Logged out successfully' };
 }
 
 export async function refreshToken(): Promise<void> {
-  await api.post('/auth/user/refresh-token');
+  await client.post('/auth/user/refresh-token');
 }
 
 export async function getMe() {
-  const { data } = await api.get('/auth/user/me');
+  const { data } = await client.get('/auth/user/me');
   return data.data;
 }
