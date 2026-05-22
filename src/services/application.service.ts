@@ -1,7 +1,7 @@
-import api from '@lib/axios';
+import client from '@lib/axios/client';
 
 export async function getApplications(filters?: Record<string, unknown>) {
-  const { data } = await api.get('/applications', { params: filters });
+  const { data } = await client.get('/applications', { params: filters });
   return data.data as {
     applications: unknown[];
     meta: { page: number; limit: number; total: number; totalPages: number };
@@ -9,7 +9,7 @@ export async function getApplications(filters?: Record<string, unknown>) {
 }
 
 export async function getApplicationStats() {
-  const { data } = await api.get('/applications');
+  const { data } = await client.get('/applications');
   const apps = (data.data?.applications ?? []) as Array<{ status: string }>;
   return {
     total: apps.length,
@@ -20,11 +20,11 @@ export async function getApplicationStats() {
 }
 
 export async function getApplicationById(id: string) {
-  const { data } = await api.get(`/applications/${id}`);
+  const { data } = await client.get(`/applications/${id}`);
   return data.data as { application: unknown };
 }
 
 export async function withdrawApplication(id: string) {
-  const { data } = await api.delete(`/applications/${id}`);
+  const { data } = await client.delete(`/applications/${id}`);
   return data;
 }
