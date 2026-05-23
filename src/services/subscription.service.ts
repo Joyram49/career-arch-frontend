@@ -1,7 +1,7 @@
-import api from '@lib/axios';
+import client from '@lib/axios/client';
 
 export async function getMySubscription() {
-  const { data } = await api.get('/subscription/my');
+  const { data } = await client.get('/subscription/my');
   return data.data as {
     plan: string;
     status: string;
@@ -13,7 +13,7 @@ export async function getMySubscription() {
 }
 
 export async function getInvoices() {
-  const { data } = await api.get('/subscription/invoices');
+  const { data } = await client.get('/subscription/invoices');
   return data.data as {
     invoices: Array<{
       id: string;
@@ -27,21 +27,21 @@ export async function getInvoices() {
 }
 
 export async function createCheckoutSession(planId: string) {
-  const { data } = await api.post('/subscription/checkout', { planId });
+  const { data } = await client.post('/subscription/checkout', { planId });
   return data.data as { checkoutUrl: string };
 }
 
 export async function cancelSubscription() {
-  const { data } = await api.post('/subscription/cancel');
+  const { data } = await client.post('/subscription/cancel');
   return data;
 }
 
 export async function reactivateSubscription() {
-  const { data } = await api.post('/subscription/reactivate');
+  const { data } = await client.post('/subscription/reactivate');
   return data;
 }
 
 export async function getPlans() {
-  const { data } = await api.get('/subscription/plans');
+  const { data } = await client.get('/subscription/plans');
   return data.data as { plans: unknown[] };
 }

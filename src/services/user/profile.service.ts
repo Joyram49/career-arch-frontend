@@ -1,19 +1,29 @@
-import api from '@lib/axios';
+import { IApiResponse } from '@app-types/api';
+import { IUser } from '@app-types/auth';
+import client from '@lib/axios/client';
+import { serverFetchOrRedirect } from '@lib/server-fetch';
 
-export async function getProfile() {
-  const { data } = await api.get('/user/profile');
-  return data.data as { user: unknown; profile: unknown };
+// ── Called from Server Components / Server Actions ──
+export async function getProfileServer(): Promise<IUser> {
+  const data = await serverFetchOrRedirect<IApiResponse<{ user: IUser }>>('/auth/user/me');
+  return data.data.user;
+}
+
+// ── Called from TanStack Query hooks (Client Components) ──
+export async function getProfileClient(): Promise<IUser> {
+  const response = await client.get<IApiResponse<{ user: IUser }>>('/auth/user/me');
+  return response.data.data.user;
 }
 
 export async function updateProfile(payload: Record<string, unknown>) {
-  const { data } = await api.put('/user/profile', payload);
+  const { data } = await client.put('/user/profile', payload);
   return data.data;
 }
 
 export async function uploadAvatar(file: File) {
   const form = new FormData();
   form.append('avatar', file);
-  const { data } = await api.post('/user/profile/avatar', form, {
+  const { data } = await client.post('/user/profile/avatar', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return data.data;
@@ -22,18 +32,18 @@ export async function uploadAvatar(file: File) {
 export async function uploadResume(file: File) {
   const form = new FormData();
   form.append('resume', file);
-  const { data } = await api.post('/user/profile/resume', form, {
+  const { data } = await client.post('/user/profile/resume', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return data.data;
 }
 
 export async function deleteResume() {
-  const { data } = await api.delete('/user/profile/resume');
+  const { data } = await client.delete('/user/profile/resume');
   return data;
 }
 
 export async function changePassword(payload: { currentPassword: string; newPassword: string }) {
-  const { data } = await api.put('/user/change-password', payload);
+  const { data } = await client.put('/user/change-password', payload);
   return data;
 }
