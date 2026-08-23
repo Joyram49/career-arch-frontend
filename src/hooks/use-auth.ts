@@ -17,12 +17,12 @@ export function useAuth(): {
   plan: IAuthState['plan'];
   isAuthenticated: IAuthState['isAuthenticated'];
   isHydrated: IAuthState['isHydrated'];
-  isUser: boolean;
-  isOrg: boolean;
-  isAdmin: boolean;
-  currentUser: IAuthState['getUser'];
-  currentOrg: IAuthState['getOrg'];
-  currentAdmin: IAuthState['getAdmin'];
+  isUser: ReturnType<IAuthState['isUser']>;
+  isOrg: ReturnType<IAuthState['isOrg']>;
+  isAdmin: ReturnType<IAuthState['isAdmin']>;
+  currentUser: ReturnType<IAuthState['getUser']>;
+  currentOrg: ReturnType<IAuthState['getOrg']>;
+  currentAdmin: ReturnType<IAuthState['getAdmin']>;
 } {
   const {
     user,
