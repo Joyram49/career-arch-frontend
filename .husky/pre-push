@@ -3,7 +3,7 @@ echo "🚀 Running pre-push checks..."
 
 # TypeScript type check
 echo "⏳ Type checking..."
-npm run typecheck
+npm run type-check
 if [ $? -ne 0 ]; then
   echo "❌ TypeScript errors found. Fix them before pushing."
   exit 1
