@@ -3,8 +3,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 // ─── Environment ────────────────────────────────────────────────────────────
-const SERVER_API_URL =
-  `${process.env.BACKEND_LOCAL_URL}/api/v1` ?? 'https://career-arch.onrender.com/api/v1';
+const SERVER_API_URL = `${process.env.BACKEND_LOCAL_URL}/api/v1`;
 
 const AUTH_PREFIXES = [
   '/login',

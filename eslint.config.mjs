@@ -1,16 +1,14 @@
-import { FlatCompat } from '@eslint/eslintrc';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
-import reactPlugin from 'eslint-plugin-react';
-import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const compat = new FlatCompat({ baseDirectory: __dirname });
 
-export default [
-  ...compat.extends('next/core-web-vitals'),
+export default defineConfig([
+  ...nextVitals,
 
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -23,8 +21,6 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tsPlugin,
-      react: reactPlugin,
-      'react-hooks': reactHooksPlugin,
     },
     rules: {
       // TypeScript
@@ -63,7 +59,12 @@ export default [
     },
   },
 
-  {
-    ignores: ['.next/', 'node_modules/', 'dist/', 'public/', '*.config.js', '*.config.mjs'],
-  },
-];
+  globalIgnores([
+    '.next/**',
+    'node_modules/**',
+    'dist/**',
+    'public/**',
+    '*.config.js',
+    '*.config.mjs',
+  ]),
+]);
