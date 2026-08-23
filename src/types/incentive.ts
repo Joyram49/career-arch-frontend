@@ -2,8 +2,8 @@
    INCENTIVE TYPES
 ═══════════════════════════════════════ */
 
-import { IOrganization, IUser } from './auth';
-import { IJob } from './job';
+import { type IOrgProfile, type IUser } from './auth';
+import { type IJob } from './job';
 
 export type IncentiveStatus = 'PENDING' | 'PAID' | 'OVERDUE' | 'WAIVED' | 'DISPUTED';
 
@@ -22,7 +22,10 @@ export interface IHiringIncentive {
   disputedAt: string | null;
   disputeReason: string | null;
   createdAt: string;
-  organization?: Pick<IOrganization, 'id' | 'companyName'>;
+  organization?: {
+    id: string;
+    profile: Pick<IOrgProfile, 'companyName'>;
+  };
   job?: Pick<IJob, 'id' | 'title'>;
   application?: {
     id: string;

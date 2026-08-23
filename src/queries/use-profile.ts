@@ -1,11 +1,11 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { IApiResponse } from '@app-types/api';
-import { IUser } from '@app-types/auth';
+import { type IApiResponse } from '@app-types/api';
+import { type IUser } from '@app-types/auth';
 import client from '@lib/axios/client';
-// import { updateProfile } from '@services/user/profile.service';
+import { updateProfile } from '@services/user/profile.service';
 
 export async function getProfileClient(): Promise<IUser> {
   const response = await client.get<IApiResponse<{ user: IUser }>>('/auth/user/me');
@@ -25,12 +25,12 @@ export function useProfile() {
   });
 }
 
-// export function useUpdateProfile() {
-//   const qc = useQueryClient();
-//   return useMutation({
-//     mutationFn: updateProfile,
-//     onSuccess: () => {
-//       void qc.invalidateQueries({ queryKey: PROFILE_KEYS.mine() });
-//     },
-//   });
-// }
+export function useUpdateProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: updateProfile,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: PROFILE_KEYS.mine() });
+    },
+  });
+}
