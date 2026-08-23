@@ -6,7 +6,7 @@ import { persist } from 'zustand/middleware';
 
 type AuthUser = IUser | IOrganization | IAdmin;
 
-interface IAuthState {
+export interface IAuthState {
   /* ── State ── */
   user: AuthUser | null;
   role: UserRole | null;

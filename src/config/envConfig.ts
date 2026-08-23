@@ -13,16 +13,6 @@ export const envConfig = {
     process.env.NEXT_PUBLIC_ENVIRONMENT === 'development'
       ? `${process.env.BACKEND_LOCAL_URL}/api/v1`
       : `${process.env.BACKEND_PRODUCTION_URL}/api/v1`,
-  //   gMapApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-  //   firebase: {
-  //     apiKey: process.env.NEXT_PUBLIC_FIREBASE_APIKEY,
-  //     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTHDOMAIN,
-  //     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECTID,
-  //     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGEBUCKET,
-  //     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGINGSENDERID,
-  //     appId: process.env.NEXT_PUBLIC_FIREBASE_APPID,
-  //     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENTID,
-  //   },
   stripePublishableKey: process.env.NEXT_PUBLIC_STRIPE_PK,
   //   googleTagManagerID: process.env.NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID,
 };

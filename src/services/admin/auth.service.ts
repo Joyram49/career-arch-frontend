@@ -1,6 +1,7 @@
 'use server';
 import type { IAdmin } from '@app-types/auth';
 import { envConfig } from '@config/envConfig';
+import { cookies } from 'next/headers';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -54,6 +55,7 @@ export type AdminRefreshResult =
  * Authenticates admin credentials. On success the backend sets two
  * HttpOnly cookies: `accessToken` + `refreshToken`. We only surface
  * the `admin` object — never the raw token string.
+ * for cookies --> followed the same rules for user login
  */
 export async function loginAdmin(data: AdminLoginInput): Promise<AdminLoginResult> {
   try {
@@ -63,6 +65,7 @@ export async function loginAdmin(data: AdminLoginInput): Promise<AdminLoginResul
         'Content-type': 'application/json',
       },
       body: JSON.stringify(data),
+      cache: 'no-store',
     });
 
     const json: BackendResponse<AdminLoginData> = await res.json();
@@ -90,6 +93,46 @@ export async function loginAdmin(data: AdminLoginInput): Promise<AdminLoginResul
       return { success: false, message: 'Unexpected server response. Please try again.' };
     }
 
+    const cookieStore = await cookies();
+    const setCookieHeaders = res.headers.getSetCookie?.() ?? [];
+
+    for (const rawCookie of setCookieHeaders) {
+      const [nameValue, ...attributes] = rawCookie.split(';').map((s) => s.trim());
+
+      if (!nameValue) continue;
+      const eqIdx = nameValue.indexOf('=');
+      const name = nameValue.slice(0, eqIdx);
+      const value = nameValue.slice(eqIdx + 1);
+
+      const attrMap: Record<string, string | boolean> = {};
+      for (const attr of attributes) {
+        const [k, v] = attr.split('=').map((s) => s.trim());
+        if (!k) continue;
+
+        attrMap[k.toLowerCase()] = v ?? true;
+      }
+
+      cookieStore.set(name, value, {
+        httpOnly: attrMap['httpOnly'] === true,
+        secure: attrMap['secure'] === true,
+        sameSite: (attrMap['samesite'] as 'strict' | 'lax' | 'none') ?? 'lax',
+        path: (attrMap['path'] as string) ?? '/',
+        maxAge:
+          attrMap['max-age'] !== undefined
+            ? parseInt(attrMap['max-age'] as string, 10)
+            : 7 * 24 * 60 * 60,
+      });
+    }
+
+    // Set readable role cookie for proxy.ts
+    cookieStore.set('userRole', 'ADMIN', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+    });
+
     return { success: true, admin: json.data.admin };
   } catch (err: unknown) {
     // fetch() only throws on genuine network failures — not HTTP error codes
@@ -116,6 +159,7 @@ export async function logoutAdmin(): Promise<AdminLogoutResult> {
         'Content-Type': 'application/json',
       },
       credentials: 'include',
+      cache: 'no-store',
     });
 
     // 401 = token already expired — still a clean logout from our side
@@ -126,6 +170,12 @@ export async function logoutAdmin(): Promise<AdminLogoutResult> {
     const json: BackendResponse<null> = await res
       .json()
       .catch(() => ({ success: false, message: '' }));
+
+    // clear all cookies
+    const cookieStore = await cookies();
+    cookieStore.delete('access_token');
+    cookieStore.delete('refresh_token');
+    cookieStore.delete('userRole');
 
     return {
       success: false,
