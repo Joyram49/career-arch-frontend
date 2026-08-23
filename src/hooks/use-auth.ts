@@ -13,9 +13,9 @@ import { useEffect } from 'react';
    ──────────────────────────────────────────── */
 export function useAuth(): {
   user: IAuthState['user'];
-  role: ReturnType<typeof useAuthStore>['role'];
-  plan: ReturnType<typeof useAuthStore>['plan'];
-  isAuthenticated: ReturnType<typeof useAuthStore>['isAuthenticated'];
+  role: IAuthState['role'];
+  plan: IAuthState['plan'];
+  isAuthenticated: IAuthState['isAuthenticated'];
   isHydrated: IAuthState['isHydrated'];
   isUser: boolean;
   isOrg: boolean;
