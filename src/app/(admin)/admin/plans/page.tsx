@@ -133,12 +133,7 @@ function PlanFormModal({
 }): React.JSX.Element {
   const isEdit = plan !== null;
 
-  const {
-    control,
-    handleSubmit,
-    formState: { _errors },
-    _watch,
-  } = useForm<PlanFormInput>({
+  const { control, handleSubmit } = useForm<PlanFormInput>({
     resolver: zodResolver(planSchema) as Resolver<PlanFormInput>,
     defaultValues: {
       name: plan?.name ?? 'BASIC',
