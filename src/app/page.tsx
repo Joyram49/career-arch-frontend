@@ -1,6 +1,5 @@
 import { PublicFooter } from '@components/layout/footer';
 import { PublicNavbar } from '@components/layout/navbar';
-import { getProfileServer } from '@services/user/profile.service';
 import type { Metadata } from 'next';
 import { FeaturedJobs } from './_components/featured-jobs';
 import { HeroSection } from './_components/hero-section';
@@ -22,8 +21,6 @@ export const metadata: Metadata = {
 };
 
 export default async function LandingPage(): Promise<React.JSX.Element> {
-  const serverProfileData = await getProfileServer();
-  console.info({ serverProfileData });
   return (
     <>
       <PublicNavbar />

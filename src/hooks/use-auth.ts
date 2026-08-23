@@ -1,7 +1,7 @@
 'use client';
 
 import type { IMeResponse } from '@app-types/auth';
-import { apiGet } from '@lib/axios';
+import { client } from '@lib/axios';
 import { useAuthStore } from '@lib/store/auth.store';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -11,7 +11,19 @@ import { useEffect } from 'react';
    Reads from Zustand store + re-fetches /me
    to keep user data fresh after page reload.
    ──────────────────────────────────────────── */
-export function useAuth() {
+export function useAuth(): {
+  user: ReturnType<typeof useAuthStore>['user'];
+  role: ReturnType<typeof useAuthStore>['role'];
+  plan: ReturnType<typeof useAuthStore>['plan'];
+  isAuthenticated: ReturnType<typeof useAuthStore>['isAuthenticated'];
+  isHydrated: ReturnType<typeof useAuthStore>['isHydrated'];
+  isUser: boolean;
+  isOrg: boolean;
+  isAdmin: boolean;
+  currentUser: ReturnType<ReturnType<typeof useAuthStore>['getUser']>;
+  currentOrg: ReturnType<ReturnType<typeof useAuthStore>['getOrg']>;
+  currentAdmin: ReturnType<ReturnType<typeof useAuthStore>['getAdmin']>;
+} {
   const {
     user,
     role,
@@ -39,7 +51,7 @@ export function useAuth() {
           : role === 'ADMIN'
             ? '/auth/admin/me'
             : '/auth/user/me';
-      return apiGet<IMeResponse>(endpoint);
+      return client.get<IMeResponse>(endpoint);
     },
     enabled: isAuthenticated && isHydrated,
     staleTime: 1000 * 60 * 5,

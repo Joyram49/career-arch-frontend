@@ -1,4 +1,3 @@
-import { IApiResponse } from '@app-types/api';
 import { envConfig } from '@config/envConfig';
 import axios, {
   type AxiosError,
@@ -118,41 +117,5 @@ client.interceptors.response.use(
     return Promise.reject(error);
   },
 );
-
-/* ── Typed request helpers ── */
-export async function apiGet<T>(
-  url: string,
-  params?: Record<string, unknown>,
-): Promise<IApiResponse<T>> {
-  const response = await client.get<IApiResponse<T>>(url, { params });
-  return response.data;
-}
-
-export async function apiPost<T>(url: string, data?: unknown): Promise<IApiResponse<T>> {
-  const response = await client.post<IApiResponse<T>>(url, data);
-  return response.data;
-}
-
-export async function apiPut<T>(url: string, data?: unknown): Promise<IApiResponse<T>> {
-  const response = await client.put<IApiResponse<T>>(url, data);
-  return response.data;
-}
-
-export async function apiPatch<T>(url: string, data?: unknown): Promise<IApiResponse<T>> {
-  const response = await client.patch<IApiResponse<T>>(url, data);
-  return response.data;
-}
-
-export async function apiDelete<T>(url: string): Promise<IApiResponse<T>> {
-  const response = await client.delete<IApiResponse<T>>(url);
-  return response.data;
-}
-
-export async function apiUpload<T>(url: string, formData: FormData): Promise<IApiResponse<T>> {
-  const response = await client.post<IApiResponse<T>>(url, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-  return response.data;
-}
 
 export default client;
