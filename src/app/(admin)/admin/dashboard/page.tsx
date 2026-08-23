@@ -299,7 +299,11 @@ export default function AdminOverviewPage(): React.JSX.Element {
                       <Cell key={e.name} fill={e.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(v: number) => `$${v.toLocaleString()}`} />
+                  <Tooltip
+                    formatter={(value) =>
+                      typeof value === 'number' ? `$${value.toLocaleString()}` : value
+                    }
+                  />
                 </PieChart>
               </ResponsiveContainer>
               <div className="mt-3 space-y-1.5">
@@ -342,7 +346,13 @@ export default function AdminOverviewPage(): React.JSX.Element {
                     tickLine={false}
                     tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
                   />
-                  <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, 'Revenue']} />
+                  <Tooltip
+                    formatter={(value) =>
+                      typeof value === 'number'
+                        ? [`$${value.toLocaleString()}`, 'Revenue']
+                        : [value, 'Revenue']
+                    }
+                  />
                   <Bar dataKey="revenue" name="revenue" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
