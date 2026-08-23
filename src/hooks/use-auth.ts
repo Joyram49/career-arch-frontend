@@ -2,7 +2,7 @@
 
 import type { IMeResponse } from '@app-types/auth';
 import { client } from '@lib/axios';
-import { useAuthStore } from '@lib/store/auth.store';
+import { type IAuthState, useAuthStore } from '@lib/store/auth.store';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 
@@ -12,17 +12,17 @@ import { useEffect } from 'react';
    to keep user data fresh after page reload.
    ──────────────────────────────────────────── */
 export function useAuth(): {
-  user: ReturnType<typeof useAuthStore>['user'];
+  user: IAuthState['user'];
   role: ReturnType<typeof useAuthStore>['role'];
   plan: ReturnType<typeof useAuthStore>['plan'];
   isAuthenticated: ReturnType<typeof useAuthStore>['isAuthenticated'];
-  isHydrated: ReturnType<typeof useAuthStore>['isHydrated'];
+  isHydrated: IAuthState['isHydrated'];
   isUser: boolean;
   isOrg: boolean;
   isAdmin: boolean;
-  currentUser: ReturnType<ReturnType<typeof useAuthStore>['getUser']>;
-  currentOrg: ReturnType<ReturnType<typeof useAuthStore>['getOrg']>;
-  currentAdmin: ReturnType<ReturnType<typeof useAuthStore>['getAdmin']>;
+  currentUser: IAuthState['getUser'];
+  currentOrg: IAuthState['getOrg'];
+  currentAdmin: IAuthState['getAdmin'];
 } {
   const {
     user,
