@@ -5,6 +5,7 @@ import { cn } from '@lib/utils';
 import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { type UrlObject } from 'url';
 
 interface NavItem {
   label: string;
@@ -102,7 +103,7 @@ export function AdminSidebar(): React.JSX.Element {
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={item.href as unknown as UrlObject}
                   className={cn(
                     'group relative flex items-center gap-2.5 rounded-lg px-3 py-1.75 text-[13px] font-medium transition-all duration-150',
                     isActive
