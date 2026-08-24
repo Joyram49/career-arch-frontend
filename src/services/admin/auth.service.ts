@@ -152,7 +152,7 @@ export async function loginAdmin(data: AdminLoginInput): Promise<AdminLoginResul
  * Non-blocking by design — callers clear local Zustand state regardless
  * of whether this request succeeds (e.g. token already expired).
  */
-export async function logoutAdmin(): Promise<AdminLogoutResult> {
+export async function logoutAdmin() {
   try {
     await serverFetchOrRedirect(`/auth/admin/logout`, {
       method: 'POST',
@@ -192,7 +192,10 @@ export async function refreshAdminToken(): Promise<AdminRefreshResult> {
         method: 'POST',
       },
     );
-    return { success: true, data: res.data };
+    if (res.data === undefined) {
+      throw new Error('Refresh token response did not include an access token.');
+    }
+    return { success: true, accessToken: res.data.accessToken };
   } catch (err: unknown) {
     return { success: false, message: networkErrorMessage(err) };
   }
@@ -216,6 +219,9 @@ export async function getAdminMe(): Promise<AdminMeResult> {
   try {
     const res = await serverFetchOrRedirect<BackendResponse<AdminMeData>>('auth/admin/me');
 
+    if (res.data === undefined) {
+      throw new Error('Admin profile response did not include an admin.');
+    }
     return { success: true, admin: res.data.admin };
   } catch (err: unknown) {
     return { success: false, message: networkErrorMessage(err) };
