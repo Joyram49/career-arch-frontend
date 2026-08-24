@@ -5,7 +5,7 @@ export const siteConfig = {
   tagline: 'Find the Job That Moves You Forward',
   description: 'Search 50,000+ jobs from verified companies. Get matched, apply fast, land offers.',
   url: envConfig.siteUrl ?? 'http://localhost:3000',
-  apiUrl: envConfig.apiUrl ?? 'http://localhost:5000/api/v1',
+  apiUrl: envConfig.serverApiUrl ?? 'http://localhost:5000/api/v1',
   social: {
     linkedin: 'https://linkedin.com/company/careerarch',
     twitter: 'https://twitter.com/careerarch',

@@ -1,7 +1,7 @@
 import { LogoIcon } from '@assets/icons/custom';
 
 // ── Decorative SVG Illustration ────────────────────────────────
-function HeroIllustration() {
+function HeroIllustration(): React.JSX.Element {
   return (
     <svg
       viewBox="0 0 420 340"
@@ -152,7 +152,7 @@ function HeroIllustration() {
 }
 
 // ── Auth Sidebar ────────────────────────────────────────────────
-export function AuthSidebar() {
+export function AuthSidebar(): React.JSX.Element {
   return (
     <aside className="relative hidden h-full w-full flex-col overflow-hidden px-10 py-10 lg:flex xl:px-14 xl:py-12">
       {/* Logo */}

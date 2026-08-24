@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 // ── Page (RSC) ──────────────────────────────────────────────────
-export default function LoginPage() {
+export default function LoginPage(): React.JSX.Element {
   return (
     <main className="relative flex min-h-screen overflow-hidden bg-background lg:bg-transparent">
       <div

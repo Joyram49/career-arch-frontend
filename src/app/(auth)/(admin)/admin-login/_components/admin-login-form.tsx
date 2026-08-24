@@ -2,11 +2,12 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, type Variants } from 'framer-motion';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import type { Resolver } from 'react-hook-form';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, type Resolver, useForm } from 'react-hook-form';
+
 import { toast } from 'sonner';
 
 import { Button } from '@ui/button';
@@ -15,9 +16,10 @@ import { Input } from '@ui/input';
 
 import { EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon, ShieldIcon } from '@assets/icons/custom';
 
+import { routes } from '@config/routes';
 import { useAuthStore } from '@lib/store/auth.store';
 import { loginAdmin } from '@services/admin/auth.service';
-import { AdminLoginInput, adminLoginSchema } from '@validations/auth.schema';
+import { type AdminLoginInput, adminLoginSchema } from '@validations/auth.schema';
 
 // ── Animation variants ─────────────────────────────────────────────────────
 
@@ -82,13 +84,13 @@ export function AdminLoginForm(): React.JSX.Element {
       setUser(result.admin, 'ADMIN');
 
       toast.success('Access granted', { description: `Welcome, ${result.admin.name}` });
-      router.push('/');
+      router.push(routes.admin.dashboard as Route);
     });
   }
 
   return (
     <motion.div
-      className="w-full max-w-[420px]"
+      className="w-full max-w-105"
       variants={wrapperVariants}
       initial="hidden"
       animate="visible"

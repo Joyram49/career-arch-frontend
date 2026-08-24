@@ -12,8 +12,7 @@ import { Input } from '@ui/input';
 import { MailIcon } from '@assets/icons/custom';
 
 import { forgotPassword } from '@services/user/auth.service';
-import type { ForgotPasswordInput } from '@validations/auth.schema';
-import { forgotPasswordSchema } from '@validations/auth.schema';
+import { forgotPasswordSchema, type ForgotPasswordInput } from '@validations/auth.schema';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 import { ResetIconBadge } from './reset-icon-badge';

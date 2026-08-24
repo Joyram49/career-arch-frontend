@@ -86,6 +86,9 @@ const admin = {
     resolveDispute: (id: string) =>
       client.post<IApiResponse<null>>(`/admin/incentives/${id}/resolve-dispute`),
   },
+  me: {
+    getMe: () => client.get<IApiResponse>('/auth/admin/me'),
+  },
 };
 
 export default admin;

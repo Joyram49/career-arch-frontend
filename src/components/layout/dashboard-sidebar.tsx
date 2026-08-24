@@ -30,6 +30,7 @@ interface NavItem {
 }
 
 /* ── Plan badge map ── */
+const FREE_PLAN_BADGE = { label: 'Free', cls: 'bg-muted text-muted-foreground' };
 const PLAN_BADGE: Record<string, { label: string; cls: string }> = {
   FREE: { label: 'Free', cls: 'bg-muted text-muted-foreground' },
   BASIC: { label: 'Basic', cls: 'bg-brand-sky/15 text-brand-sky' },
@@ -40,7 +41,7 @@ const PLAN_BADGE: Record<string, { label: string; cls: string }> = {
 export function DashboardSidebar(): React.JSX.Element {
   const pathname = usePathname();
   const router = useRouter();
-  const { getUser, plan, clearAuth, isUser } = useAuthStore();
+  const { getUser, plan, clearAuth } = useAuthStore();
   const { sidebarOpen, setSidebarOpen } = useUiStore();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -48,38 +49,38 @@ export function DashboardSidebar(): React.JSX.Element {
     {
       href: '/user/overview',
       label: 'Overview',
-      icon: <IconOverview className="size-[18px]" />,
+      icon: <IconOverview className="size-4.5" />,
     },
     {
       href: '/user/applications',
       label: 'My Applications',
-      icon: <IconApplications className="size-[18px]" />,
+      icon: <IconApplications className="size-4.5" />,
     },
     {
       href: '/user/saved-jobs',
       label: 'Saved Jobs',
-      icon: <IconSaved className="size-[18px]" />,
+      icon: <IconSaved className="size-4.5" />,
     },
     {
       href: '/user/profile',
       label: 'My Profile',
-      icon: <IconProfile className="size-[18px]" />,
+      icon: <IconProfile className="size-4.5" />,
     },
     {
       href: '/user/subscription',
       label: 'Subscription',
-      icon: <IconSubscription className="size-[18px]" />,
+      icon: <IconSubscription className="size-4.5" />,
     },
     {
       href: '/user/notifications',
       label: 'Notifications',
-      icon: <IconNotification className="size-[18px]" />,
+      icon: <IconNotification className="size-4.5" />,
       badge: 3,
     },
     {
       href: '/user/settings',
       label: 'Settings',
-      icon: <IconSettings className="size-[18px]" />,
+      icon: <IconSettings className="size-4.5" />,
     },
   ];
 
@@ -96,7 +97,7 @@ export function DashboardSidebar(): React.JSX.Element {
   }, [clearAuth, router]);
   const user = getUser();
 
-  const planMeta = PLAN_BADGE[plan ?? 'FREE'] ?? PLAN_BADGE['FREE']!;
+  const planMeta = PLAN_BADGE[plan ?? 'FREE'] ?? FREE_PLAN_BADGE;
   const firstName = user?.profile?.firstName ?? '';
   const lastName = user?.profile?.lastName ?? '';
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -184,7 +185,7 @@ export function DashboardSidebar(): React.JSX.Element {
           className="nav-item w-full text-brand-red hover:bg-brand-red/10 hover:text-brand-red disabled:opacity-50"
           aria-label="Sign out of your account"
         >
-          <IconSignOut className="size-[18px]" />
+          <IconSignOut className="size-4.5" />
           <span className="text-[13px] font-semibold">
             {isLoggingOut ? 'Signing out…' : 'Sign Out'}
           </span>

@@ -2,8 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
-import type { Resolver } from 'react-hook-form';
-import { Controller, useForm } from 'react-hook-form';
+
+import { type Resolver, Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
 
@@ -31,6 +31,7 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 /* ── Plan badge ── */
+const FREE_PLAN_META = { label: 'Free Plan', cls: 'badge-plan-free' };
 const PLAN_META: Record<string, { label: string; cls: string }> = {
   FREE: { label: 'Free Plan', cls: 'badge-plan-free' },
   BASIC: { label: 'Basic Plan', cls: 'badge-plan-basic' },
@@ -47,7 +48,7 @@ function ProfilePreview({
   initials: string;
   plan: string;
 }): React.JSX.Element {
-  const planMeta = PLAN_META[plan] ?? PLAN_META['FREE']!;
+  const planMeta = PLAN_META[plan] ?? FREE_PLAN_META;
   return (
     <div className="profile-preview-card">
       {/* Banner */}

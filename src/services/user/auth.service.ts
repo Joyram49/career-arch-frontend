@@ -1,8 +1,9 @@
 'use server';
-import { IUser } from '@app-types/auth';
+import { type IApiResponse } from '@app-types/api';
+import { type IUser, type IUserProfile } from '@app-types/auth';
 import { envConfig } from '@config/envConfig';
-import client from '@lib/axios/client';
-import { LoginInput, RegisterInput } from '@validations/auth.schema';
+import { serverFetchOrRedirect } from '@lib/server-fetch';
+import { type LoginInput, type RegisterInput } from '@validations/auth.schema';
 import { cookies } from 'next/headers';
 
 interface IRegisterSuccessResult {
@@ -79,7 +80,7 @@ export async function userRegistration(
   };
   try {
     body = await response.json();
-  } catch (error) {
+  } catch {
     return {
       success: false,
       message: 'Unexpected server response. Please try again.',
@@ -138,7 +139,7 @@ export async function resendVerificationEmail(
   };
   try {
     body = await response.json();
-  } catch (error) {
+  } catch {
     return {
       success: false,
       message: 'Unexpected server response. Please try again.',
@@ -405,7 +406,7 @@ export async function loginUser(input: LoginInput): Promise<LoginResult> {
    * (career-arch.onrender.com), we need to manually forward the Set-Cookie
    * headers to the browser response.
    */
-  // ✅ Forward the backend's HttpOnly cookies to the browser
+  // Forward the backend's HttpOnly cookies to the browser
   const cookieStore = await cookies();
   const setCookieHeaders = response.headers.getSetCookie?.() ?? [];
 
@@ -494,10 +495,10 @@ export async function logoutUser(): Promise<{ success: boolean; message: string 
 }
 
 export async function refreshToken(): Promise<void> {
-  await client.post('/auth/user/refresh-token');
+  await serverFetchOrRedirect('/auth/user/refresh-token');
 }
 
-export async function getMe() {
-  const { data } = await client.get('/auth/user/me');
-  return data.data;
+export async function getMe(): Promise<Partial<IUserProfile>> {
+  const response = await serverFetchOrRedirect<IApiResponse<{ user: IUser }>>('/auth/user/me');
+  return response.data.user.profile ?? {};
 }

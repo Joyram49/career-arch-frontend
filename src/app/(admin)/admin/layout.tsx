@@ -5,11 +5,7 @@ export const metadata: Metadata = {
   title: { template: '%s | CareerArch Admin', default: 'Admin | CareerArch' },
 };
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}): React.JSX.Element {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <AdminSidebar />
