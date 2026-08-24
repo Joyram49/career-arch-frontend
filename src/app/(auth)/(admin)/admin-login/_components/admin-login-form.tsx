@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, type Variants } from 'framer-motion';
+import type { Route } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -15,6 +16,7 @@ import { Input } from '@ui/input';
 
 import { EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon, ShieldIcon } from '@assets/icons/custom';
 
+import { routes } from '@config/routes';
 import { useAuthStore } from '@lib/store/auth.store';
 import { loginAdmin } from '@services/admin/auth.service';
 import { type AdminLoginInput, adminLoginSchema } from '@validations/auth.schema';
@@ -82,7 +84,7 @@ export function AdminLoginForm(): React.JSX.Element {
       setUser(result.admin, 'ADMIN');
 
       toast.success('Access granted', { description: `Welcome, ${result.admin.name}` });
-      router.push('/admin/dashboard');
+      router.push(routes.admin.dashboard as Route);
     });
   }
 
