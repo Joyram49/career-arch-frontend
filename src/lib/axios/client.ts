@@ -8,11 +8,11 @@ import axios, {
 
 /* ─────────────────────────────────────────────
    Axios instance
-   withCredentials: true — JWT rides in HttpOnly cookies set by backend
-   We never manually attach Authorization headers
+   withCredentials: true — HttpOnly cookie is sent automatically
+   timeout: 15 seconds
    ──────────────────────────────────────────── */
 const client: AxiosInstance = axios.create({
-  baseURL: envConfig.apiUrl,
+  baseURL: envConfig.serverApiUrl,
   withCredentials: true,
   timeout: 15_000,
   headers: {
@@ -32,6 +32,7 @@ client.interceptors.request.use(
 
 /* ── Response interceptor ── */
 let isRefreshing = false;
+
 let failedQueue: Array<{
   resolve: (value: AxiosResponse) => void;
   reject: (error: unknown) => void;
@@ -84,7 +85,11 @@ client.interceptors.response.use(
               ? '/auth/admin/refresh-token'
               : '/auth/user/refresh-token';
 
-        await axios.post(`${envConfig.apiUrl}${refreshEndpoint}`, {}, { withCredentials: true });
+        await axios.post(
+          `${envConfig.serverApiUrl}${refreshEndpoint}`,
+          {},
+          { withCredentials: true },
+        );
 
         // Retry original request — new cookie is now set
         const retried = await client(originalRequest);

@@ -3,7 +3,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 // ─── Environment ────────────────────────────────────────────────────────────
-const SERVER_API_URL = `${process.env.BACKEND_LOCAL_URL}/api/v1`;
+const SERVER_API_URL = `${process.env.NEXT_PUBLIC_BACKEND_LOCAL_URL}/api/v1`;
 
 const AUTH_PREFIXES = [
   '/login',
@@ -120,12 +120,12 @@ function buildNextResponse(
   setCookies: string[],
 ): NextResponse {
   const reqHeaders = new Headers(request.headers);
-  // ✅ Custom header inject — serverFetch will read it
+  //  Custom header inject — serverFetch will read it
   reqHeaders.set('x-refreshed-access-token', accessToken);
 
   const response = NextResponse.next({ request: { headers: reqHeaders } });
 
-  // ✅ attached Set-Cookie for browser
+  // attached Set-Cookie for browser
   for (const cookie of setCookies) {
     response.headers.append('Set-Cookie', cookie);
   }

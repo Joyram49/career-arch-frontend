@@ -31,7 +31,7 @@ export async function serverFetch<T>(path: string, options: ServerFetchOptions =
     }
   }
 
-  const response = await fetch(`${envConfig.serverApiUrl}${path}`, {
+  const response = await fetch(`${envConfig.serverApiUrl}/${path}`, {
     ...fetchOptions,
     headers: {
       'Content-Type': 'application/json',
