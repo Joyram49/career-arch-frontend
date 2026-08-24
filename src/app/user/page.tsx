@@ -1,8 +1,8 @@
-import { Route } from 'next';
+import { type Route } from 'next';
 import { redirect } from 'next/navigation';
 
-const UserPage = () => {
-  redirect('/user/overview' as Route);
+const UserPage = (): never => {
+  redirect('/user/dashboard' as Route);
 };
 
 export default UserPage;
