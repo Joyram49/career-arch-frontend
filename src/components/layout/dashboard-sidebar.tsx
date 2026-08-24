@@ -30,6 +30,7 @@ interface NavItem {
 }
 
 /* ── Plan badge map ── */
+const FREE_PLAN_BADGE = { label: 'Free', cls: 'bg-muted text-muted-foreground' };
 const PLAN_BADGE: Record<string, { label: string; cls: string }> = {
   FREE: { label: 'Free', cls: 'bg-muted text-muted-foreground' },
   BASIC: { label: 'Basic', cls: 'bg-brand-sky/15 text-brand-sky' },
@@ -96,7 +97,7 @@ export function DashboardSidebar(): React.JSX.Element {
   }, [clearAuth, router]);
   const user = getUser();
 
-  const planMeta = PLAN_BADGE[plan ?? 'FREE'];
+  const planMeta = PLAN_BADGE[plan ?? 'FREE'] ?? FREE_PLAN_BADGE;
   const firstName = user?.profile?.firstName ?? '';
   const lastName = user?.profile?.lastName ?? '';
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
