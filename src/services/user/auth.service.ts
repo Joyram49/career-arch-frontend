@@ -1,4 +1,5 @@
 'use server';
+import { type IApiResponse } from '@app-types/api';
 import { type IUser, type IUserProfile } from '@app-types/auth';
 import { envConfig } from '@config/envConfig';
 import { serverFetchOrRedirect } from '@lib/server-fetch';
@@ -498,6 +499,6 @@ export async function refreshToken(): Promise<void> {
 }
 
 export async function getMe(): Promise<Partial<IUserProfile>> {
-  const { data } = await serverFetchOrRedirect<BackendResponse<IUserProfile>>('/auth/user/me');
-  return data.data;
+  const response = await serverFetchOrRedirect<IApiResponse<{ user: IUser }>>('/auth/user/me');
+  return response.data.user.profile ?? {};
 }

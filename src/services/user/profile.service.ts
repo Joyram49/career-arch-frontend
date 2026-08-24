@@ -1,6 +1,7 @@
-'user server';
+'use server';
 import { type IApiResponse } from '@app-types/api';
-import { type IUser } from '@app-types/auth';
+import { type IUser, type IUserProfile } from '@app-types/auth';
+import client from '@lib/axios/client';
 import { serverFetchOrRedirect } from '@lib/server-fetch';
 
 // ── Called from Server Components / Server Actions ──
@@ -15,12 +16,12 @@ export async function getProfileServer(): Promise<IUser> {
 //   return response.data.data.user;
 // }
 
-// export async function updateProfile(
-//   payload: Record<string, unknown>,
-// ): Promise<Partial<IUserProfile>> {
-//   const { data } = await client.put('/user/profile', payload);
-//   return data.data;
-// }
+export async function updateProfile(
+  payload: Record<string, unknown>,
+): Promise<Partial<IUserProfile>> {
+  const { data } = await client.put<IApiResponse<{ user: IUser }>>('/user/profile', payload);
+  return data.data.user.profile ?? {};
+}
 
 // export async function uploadAvatar(file: File) {
 //   const form = new FormData();
@@ -45,7 +46,10 @@ export async function getProfileServer(): Promise<IUser> {
 //   return data;
 // }
 
-// export async function changePassword(payload: { currentPassword: string; newPassword: string }) {
-//   const { data } = await client.put('/user/change-password', payload);
-//   return data;
-// }
+export async function changePassword(payload: {
+  currentPassword: string;
+  newPassword: string;
+}): Promise<IApiResponse> {
+  const { data } = await client.put<IApiResponse<null>>('/user/change-password', payload);
+  return data;
+}
