@@ -160,6 +160,14 @@ function ChartTooltip({
 
 /* ── Page ─────────────────────────────────────────────────── */
 export default function AdminOverviewPage(): React.JSX.Element {
+  // const { data, isLoading } = useQuery({
+  //   queryKey: ['admin-profile'],
+  //   queryFn: () => APIKit.admin.me.getMe().then((res) => res.data.data),
+  // });
+  // if (isLoading) {
+  //   return <div>Profile is fetching</div>;
+  // }
+  // console.log(data);
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <AdminPageHeader

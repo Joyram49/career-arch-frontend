@@ -5,8 +5,8 @@ import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import type { Resolver } from 'react-hook-form';
-import { Controller, useForm } from 'react-hook-form';
+
+import { Controller, type Resolver, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 import { Button } from '@ui/button';
@@ -14,8 +14,7 @@ import { Checkbox } from '@ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/field';
 import { Input } from '@ui/input';
 
-import type { LoginInput } from '@validations/auth.schema';
-import { loginSchema } from '@validations/auth.schema';
+import { type LoginInput, loginSchema } from '@validations/auth.schema';
 
 import { EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon } from '@assets/icons/custom';
 

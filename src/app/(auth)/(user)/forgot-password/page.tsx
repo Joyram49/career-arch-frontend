@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 // ── Page (RSC) ──────────────────────────────────────────────────
-export default function ForgotPasswordPage() {
+export default function ForgotPasswordPage(): React.JSX.Element {
   return (
     <main className="relative flex min-h-screen overflow-hidden bg-background lg:bg-transparent">
       {/* Full-page dark gradient backdrop (desktop only) */}
