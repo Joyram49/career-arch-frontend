@@ -1,6 +1,7 @@
 'use server';
 import type { IAdmin } from '@app-types/auth';
 import { envConfig } from '@config/envConfig';
+import { serverFetchOrRedirect } from '@lib/server-fetch';
 import { cookies } from 'next/headers';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -153,34 +154,15 @@ export async function loginAdmin(data: AdminLoginInput): Promise<AdminLoginResul
  */
 export async function logoutAdmin(): Promise<AdminLogoutResult> {
   try {
-    const res = await fetch(`${envConfig.serverApiUrl}/auth/admin/logout`, {
+    await serverFetchOrRedirect(`/auth/admin/logout`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      cache: 'no-store',
     });
-
-    // 401 = token already expired — still a clean logout from our side
-    if (res.status === 401 || res.ok) {
-      return { success: true };
-    }
-
-    const json: BackendResponse<null> = await res
-      .json()
-      .catch(() => ({ success: false, message: '' }));
 
     // clear all cookies
     const cookieStore = await cookies();
     cookieStore.delete('access_token');
     cookieStore.delete('refresh_token');
     cookieStore.delete('userRole');
-
-    return {
-      success: false,
-      message: json.message || 'Logout request failed — session cleared locally.',
-    };
   } catch {
     // Network error during logout — never block the user from logging out locally
     return {
@@ -204,24 +186,13 @@ export async function logoutAdmin(): Promise<AdminLogoutResult> {
  */
 export async function refreshAdminToken(): Promise<AdminRefreshResult> {
   try {
-    const res = await fetch(`${envConfig.serverApiUrl}/auth/admin/refresh-token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const res = await serverFetchOrRedirect<BackendResponse<RefreshTokenData>>(
+      '/auth/admin/refresh-token',
+      {
+        method: 'POST',
       },
-      credentials: 'include',
-    });
-
-    const json: BackendResponse<RefreshTokenData> = await res.json();
-
-    if (!res.ok || !json.success || json.data === undefined) {
-      return {
-        success: false,
-        message: json.message ?? 'Session expired. Please log in again.',
-      };
-    }
-
-    return { success: true, accessToken: json.data.accessToken };
+    );
+    return { success: true, data: res.data };
   } catch (err: unknown) {
     return { success: false, message: networkErrorMessage(err) };
   }
@@ -243,29 +214,9 @@ export async function refreshAdminToken(): Promise<AdminRefreshResult> {
  */
 export async function getAdminMe(): Promise<AdminMeResult> {
   try {
-    const res = await fetch(`${envConfig.serverApiUrl}/auth/admin/me`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
+    const res = await serverFetchOrRedirect<BackendResponse<AdminMeData>>('auth/admin/me');
 
-    // 401 = not authenticated — not an error, just unauthenticated
-    if (res.status === 401) {
-      return { success: false, message: 'Not authenticated.' };
-    }
-
-    const json: BackendResponse<AdminMeData> = await res.json();
-
-    if (!res.ok || !json.success || json.data === undefined) {
-      return {
-        success: false,
-        message: json.message ?? 'Failed to load admin profile.',
-      };
-    }
-
-    return { success: true, admin: json.data.admin };
+    return { success: true, admin: res.data.admin };
   } catch (err: unknown) {
     return { success: false, message: networkErrorMessage(err) };
   }

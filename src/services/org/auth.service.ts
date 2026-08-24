@@ -1,7 +1,7 @@
 'use server';
-import { IOrganization } from '@app-types/auth';
+import { type IOrganization } from '@app-types/auth';
 import { envConfig } from '@config/envConfig';
-import { LoginInput, RegisterOrgInput } from '@validations/auth.schema';
+import { type LoginInput, type RegisterOrgInput } from '@validations/auth.schema';
 import { cookies } from 'next/headers';
 
 interface IRegisterSuccessResult {
@@ -133,7 +133,7 @@ export async function resendVerificationEmail(
   };
   try {
     body = await response.json();
-  } catch (error) {
+  } catch {
     return {
       success: false,
       message: 'Unexpected server response. Please try again.',
@@ -400,6 +400,35 @@ export async function loginUser(input: LoginInput): Promise<LoginResult> {
    * headers to the browser response.
    */
   const cookieStore = await cookies();
+
+  const setCookieHeaders = response.headers.getSetCookie?.() ?? [];
+
+  for (const rawCookie of setCookieHeaders) {
+    const [nameValue, ...attributes] = rawCookie.split(';').map((s) => s.trim());
+    if (!nameValue) continue;
+
+    const eqIdx = nameValue.indexOf('=');
+    const name = nameValue.slice(0, eqIdx);
+    const value = nameValue.slice(eqIdx + 1);
+
+    const attrMap: Record<string, string | boolean> = {};
+    for (const attr of attributes) {
+      const [k, v] = attr.split('=').map((s) => s.trim());
+      if (!k) continue;
+      attrMap[k.toLowerCase()] = v ?? true;
+    }
+
+    cookieStore.set(name, value, {
+      httpOnly: attrMap['httponly'] === true,
+      secure: attrMap['secure'] === true,
+      sameSite: (attrMap['samesite'] as 'strict' | 'lax' | 'none') ?? 'lax',
+      path: (attrMap['path'] as string) ?? '/',
+      maxAge:
+        attrMap['max-age'] !== undefined
+          ? parseInt(attrMap['max-age'] as string, 10)
+          : 7 * 24 * 60 * 60,
+    });
+  }
 
   // Set readable role cookie for proxy.ts route guards
   cookieStore.set('userRole', 'ORGANIZATION', {
