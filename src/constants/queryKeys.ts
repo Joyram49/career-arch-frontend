@@ -1,3 +1,4 @@
+import { type ChartRange } from '@app-types/admin/admin.dashboard';
 import { type IJobFilters } from '@app-types/job';
 
 /* ─────────────────────────────────────────────

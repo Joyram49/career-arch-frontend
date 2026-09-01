@@ -37,7 +37,9 @@ export function RevenueByPlanChart(): React.JSX.Element {
     staleTime: 1000 * 60 * 5,
   });
 
-  const chartData = (data?.breakdown ?? []).map((b) => ({
+  console.log('RevenueByPlanChart data:', data);
+
+  const chartData = (data?.breakdown ?? []).map((b: { plan: PlanKey; amountCents: number }) => ({
     name: b.plan,
     value: b.amountCents / 100,
     color: PLAN_COLORS[b.plan],
@@ -83,7 +85,7 @@ export function RevenueByPlanChart(): React.JSX.Element {
                 paddingAngle={3}
                 dataKey="value"
               >
-                {chartData.map((e) => (
+                {chartData.map((e: { name: string; value: number; color: string }) => (
                   <Cell key={e.name} fill={e.color} />
                 ))}
               </Pie>
@@ -97,7 +99,7 @@ export function RevenueByPlanChart(): React.JSX.Element {
             </PieChart>
           </ResponsiveContainer>
           <div className="mt-3 space-y-1.5">
-            {chartData.map((p) => (
+            {chartData.map((p: { name: string; value: number; color: string }) => (
               <div key={p.name} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1.5">
                   <span

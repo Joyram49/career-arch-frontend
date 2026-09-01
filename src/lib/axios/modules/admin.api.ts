@@ -3,6 +3,9 @@ import {
   type ChartRange,
   type IAdminDashboardStats,
   type IRegistrationChartData,
+  type IRevenueByPlanData,
+  type IRevenueTrendData,
+  type RevenueTrendRange,
 } from '@app-types/admin/admin.dashboard';
 import type { IApiResponse, IPaginationMeta } from '@app-types/api';
 import client from '../client';

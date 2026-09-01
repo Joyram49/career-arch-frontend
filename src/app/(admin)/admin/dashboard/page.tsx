@@ -251,7 +251,10 @@ export default function AdminOverviewPage(): React.JSX.Element {
               })}
               trend={{
                 value: `${data.incentives.totalOverdueCount} overdue`,
-                direction: getDirection(data.incentives.totalOverdueCount),
+                direction: getDirection(
+                  data.incentives.totalOverdueCount,
+                  data.incentives.totalPendingCount,
+                ),
               }}
               icon="ti-coin"
               accent="amber"
