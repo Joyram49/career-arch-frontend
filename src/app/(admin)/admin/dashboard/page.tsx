@@ -1,51 +1,14 @@
 'use client';
 
+import { APIKit } from '@lib/axios';
 import { cn } from '@lib/utils';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@ui/button';
 import { motion, type Variants } from 'framer-motion';
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
 import { AdminPageHeader, AdminStatCard } from '../_components/shared';
-
-/* ── Mock data ─────────────────────────────────────────────── */
-const registrationData = [
-  { day: '1 May', users: 62, orgs: 4 },
-  { day: '5 May', users: 89, orgs: 7 },
-  { day: '10 May', users: 74, orgs: 3 },
-  { day: '15 May', users: 143, orgs: 12 },
-  { day: '20 May', users: 108, orgs: 9 },
-  { day: '25 May', users: 161, orgs: 14 },
-  { day: '30 May', users: 134, orgs: 11 },
-];
-
-const revenueByPlan = [
-  { name: 'Free', value: 0, color: '#94a3b8' },
-  { name: 'Basic', value: 18420, color: '#0ea5e9' },
-  { name: 'Premium', value: 29870, color: '#f59e0b' },
-];
-
-const weeklyRevenue = [
-  { week: 'W1', revenue: 9800 },
-  { week: 'W2', revenue: 11200 },
-  { week: 'W3', revenue: 10400 },
-  { week: 'W4', revenue: 13600 },
-  { week: 'W5', revenue: 12100 },
-  { week: 'W6', revenue: 14800 },
-  { week: 'W7', revenue: 13290 },
-];
+import { RegistrationChart } from './_components/registration-chart';
+import { RevenueByPlanChart } from './_components/revenue-by-plan-chart';
+import { RevenueTrendChart } from './_components/revenue-trend-chart';
 
 const pendingActions = [
   {
@@ -122,6 +85,29 @@ const BADGE_STYLES: Record<string, string> = {
   blue: 'bg-sky-500/10 text-sky-700 border border-sky-200',
 };
 
+const getDirection = (current: number, prev: number): 'up' | 'down' | 'neutral' => {
+  if (current > prev) return 'up';
+  if (prev < current) return 'down';
+  return 'neutral';
+};
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const getTrend = (current: number, previous: number) => {
+  if (previous === 0) {
+    return {
+      value: current === 0 ? '0.0% vs last month' : 'New',
+      direction: current === 0 ? 'neutral' : 'up',
+    } as const;
+  }
+
+  const percentage = ((current - previous) / previous) * 100;
+
+  return {
+    value: `${Math.abs(percentage).toFixed(1)}% vs last month`,
+    direction: percentage > 0 ? 'up' : percentage < 0 ? 'down' : 'neutral',
+  } as const;
+};
+
 /* ── Variants ─────────────────────────────────────────────── */
 const containerVariants: Variants = {
   hidden: {},
@@ -136,38 +122,63 @@ const itemVariants: Variants = {
   },
 };
 
-function ChartTooltip({
-  active,
-  payload,
-  label,
-}: {
-  active?: boolean;
-  payload?: Array<{ name: string; value: number; color: string }>;
-  label?: string;
-}): React.JSX.Element | null {
-  if (!active || !payload?.length) return null;
+function DashboardLoadingState(): React.JSX.Element {
   return (
-    <div className="shadow-dropdown rounded-lg border border-border bg-card px-3 py-2">
-      <p className="mb-1 text-[10px] font-semibold text-muted-foreground">{label}</p>
-      {payload.map((p) => (
-        <p key={p.name} className="text-sm font-bold" style={{ color: p.color }}>
-          {p.name}: {p.name === 'revenue' ? `$${p.value.toLocaleString()}` : p.value}
-        </p>
-      ))}
+    <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="border-b border-border bg-card px-6 py-5">
+        <div className="h-6 w-44 animate-pulse rounded-md bg-muted" />
+        <div className="mt-2 h-4 w-80 animate-pulse rounded-md bg-muted/80" />
+      </div>
+
+      <div className="flex-1 space-y-5 bg-muted/30 p-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-28 animate-pulse rounded-xl border border-border bg-card"
+            />
+          ))}
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <div className="col-span-2 h-64 animate-pulse rounded-xl border border-border bg-card" />
+          <div className="h-64 animate-pulse rounded-xl border border-border bg-card" />
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <div className="h-52 animate-pulse rounded-xl border border-border bg-card" />
+          <div className="h-52 animate-pulse rounded-xl border border-border bg-card" />
+          <div className="h-52 animate-pulse rounded-xl border border-border bg-card" />
+        </div>
+      </div>
     </div>
   );
 }
 
 /* ── Page ─────────────────────────────────────────────────── */
 export default function AdminOverviewPage(): React.JSX.Element {
-  // const { data, isLoading } = useQuery({
-  //   queryKey: ['admin-profile'],
-  //   queryFn: () => APIKit.admin.me.getMe().then((res) => res.data.data),
-  // });
-  // if (isLoading) {
-  //   return <div>Profile is fetching</div>;
-  // }
-  // console.log(data);
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: async () => {
+      const res = await APIKit.admin.dashboard.getStats();
+      return res.data.data.stats;
+    },
+  });
+
+  if (isLoading) {
+    return <DashboardLoadingState />;
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex flex-1 items-center justify-center bg-muted/30 p-6">
+        <div className="rounded-xl border border-border bg-card px-6 py-4 text-sm text-muted-foreground">
+          Unable to load dashboard stats.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <AdminPageHeader
@@ -185,186 +196,84 @@ export default function AdminOverviewPage(): React.JSX.Element {
           {/* ── Stats row ── */}
           <motion.div
             variants={itemVariants}
-            className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6"
+            className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5"
           >
             <AdminStatCard
               label="Total Users"
-              value="24,847"
-              trend={{ value: '143 this week', direction: 'up' }}
+              value={data.users.total.toLocaleString()}
+              trend={{
+                value: `${data.users.newThisWeek} this week`,
+                direction: getDirection(data.users.newThisWeek, data.users.userPrevWeek),
+              }}
               icon="ti-users"
               accent="sky"
             />
             <AdminStatCard
               label="Organizations"
-              value="1,204"
-              trend={{ value: '8 pending approval', direction: 'neutral' }}
+              value={data.organizations.total.toLocaleString()}
+              trend={{
+                value: `${data.organizations.newThisWeek} this week`,
+                direction: getDirection(
+                  data.organizations.newThisWeek,
+                  data.organizations.orgsPrevWeek,
+                ),
+              }}
               icon="ti-building"
               accent="purple"
             />
             <AdminStatCard
               label="Active Jobs"
-              value="5,842"
-              trend={{ value: '12% this month', direction: 'up' }}
+              value={data.jobs.published.toLocaleString()}
+              trend={{
+                value: `${data.jobs.newJobThisMonth} this month`,
+                direction: getDirection(data.jobs.newJobThisMonth, data.jobs.newJobPrevMonth),
+              }}
               icon="ti-briefcase"
               accent="emerald"
             />
             <AdminStatCard
               label="Revenue MRR"
-              value="$48,290"
-              trend={{ value: '7.4% vs last month', direction: 'up' }}
+              value={(data.revenue.mrrCents / 100).toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+              })}
+              trend={getTrend(data.revenue.mrrCents, data.revenue.previousMrrCents)}
               icon="ti-trending-up"
               accent="emerald"
             />
             <AdminStatCard
               label="Pending Incentives"
-              value="$2,400"
-              trend={{ value: '4 overdue', direction: 'down' }}
+              value={data.incentives.totalPendingCents.toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0,
+              })}
+              trend={{
+                value: `${data.incentives.totalOverdueCount} overdue`,
+                direction: getDirection(
+                  data.incentives.totalOverdueCount,
+                  data.incentives.totalPendingCount,
+                ),
+              }}
               icon="ti-coin"
               accent="amber"
-            />
-            <AdminStatCard
-              label="Churn Rate"
-              value="3.2%"
-              trend={{ value: '0.3% vs last month', direction: 'down' }}
-              icon="ti-chart-arrows-vertical"
-              accent="red"
             />
           </motion.div>
 
           {/* ── Charts ── */}
           <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4">
             {/* Area chart */}
-            <div className="col-span-2 rounded-xl border border-border bg-card p-5 shadow-sm">
-              <h2 className="text-sm font-bold text-foreground">User Registrations</h2>
-              <p className="mb-4 text-xs text-muted-foreground">Last 30 days — users &amp; orgs</p>
-              <ResponsiveContainer width="100%" height={190}>
-                <AreaChart
-                  data={registrationData}
-                  margin={{ top: 0, right: 4, left: -24, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="ug" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.18} />
-                      <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="og" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.18} />
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                  <XAxis
-                    dataKey="day"
-                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip content={<ChartTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Area
-                    type="monotone"
-                    dataKey="users"
-                    name="users"
-                    stroke="#0ea5e9"
-                    strokeWidth={2}
-                    fill="url(#ug)"
-                    dot={false}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="orgs"
-                    name="orgs"
-                    stroke="#10b981"
-                    strokeWidth={2}
-                    fill="url(#og)"
-                    dot={false}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            <RegistrationChart />
 
             {/* Donut */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-              <h2 className="text-sm font-bold text-foreground">Revenue by Plan</h2>
-              <p className="mb-2 text-xs text-muted-foreground">MRR breakdown</p>
-              <ResponsiveContainer width="100%" height={150}>
-                <PieChart>
-                  <Pie
-                    data={revenueByPlan}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={68}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {revenueByPlan.map((e) => (
-                      <Cell key={e.name} fill={e.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value) =>
-                      typeof value === 'number' ? `$${value.toLocaleString()}` : value
-                    }
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="mt-3 space-y-1.5">
-                {revenueByPlan.map((p) => (
-                  <div key={p.name} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className="inline-block size-2 rounded-full"
-                        style={{ background: p.color }}
-                      />
-                      <span className="text-muted-foreground">{p.name}</span>
-                    </div>
-                    <span className="font-semibold text-foreground">
-                      ${p.value.toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <RevenueByPlanChart />
           </motion.div>
 
           {/* ── Bottom row ── */}
           <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4">
             {/* Weekly revenue bar */}
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-              <h2 className="text-sm font-bold text-foreground">Weekly Revenue</h2>
-              <p className="mb-4 text-xs text-muted-foreground">Last 7 weeks</p>
-              <ResponsiveContainer width="100%" height={150}>
-                <BarChart data={weeklyRevenue} margin={{ top: 0, right: 0, left: -24, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                  <XAxis
-                    dataKey="week"
-                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(v: number) => `$${(v / 1000).toFixed(0)}k`}
-                  />
-                  <Tooltip
-                    formatter={(value) =>
-                      typeof value === 'number'
-                        ? [`$${value.toLocaleString()}`, 'Revenue']
-                        : [value, 'Revenue']
-                    }
-                  />
-                  <Bar dataKey="revenue" name="revenue" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <RevenueTrendChart />
 
             {/* Pending actions */}
             <div className="rounded-xl border border-border bg-card shadow-sm">

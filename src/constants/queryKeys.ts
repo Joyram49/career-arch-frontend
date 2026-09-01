@@ -1,4 +1,5 @@
-import { IJobFilters } from '@app-types/job';
+import { type ChartRange } from '@app-types/admin/admin.dashboard';
+import { type IJobFilters } from '@app-types/job';
 
 /* ─────────────────────────────────────────────
    Query key factories
@@ -82,7 +83,10 @@ export const queryKeys = {
 
   /* ── Admin ── */
   admin: {
-    stats: () => ['admin', 'stats'] as const,
+    stats: {
+      dashboard: () => ['admin', 'stats', 'dashboard'] as const,
+      registrations: (range: ChartRange) => ['admin', 'stats', 'registrations', range] as const,
+    },
     users: {
       list: (filters?: Record<string, unknown>) => ['admin', 'users', 'list', filters] as const,
       detail: (id: string) => ['admin', 'users', 'detail', id] as const,

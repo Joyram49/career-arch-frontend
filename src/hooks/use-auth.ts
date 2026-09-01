@@ -40,49 +40,44 @@ export function useAuth(): {
     getAdmin,
   } = useAuthStore();
 
-  /* Re-fetch /me on mount when we think we're authenticated.
-     This refreshes the user object without requiring a re-login. */
   const { data, isError } = useQuery({
     queryKey: ['auth', 'me', role],
-    queryFn: async (): Promise<{ data: IMeResponse }> => {
+    queryFn: async (): Promise<IMeResponse> => {
       const endpoint =
         role === 'ORGANIZATION'
           ? '/auth/org/me'
           : role === 'ADMIN'
             ? '/auth/admin/me'
             : '/auth/user/me';
-      return client.get<IMeResponse>(endpoint);
+
+      const response = await client.get<{ data: IMeResponse }>(endpoint);
+      return response.data?.data ?? response.data ?? {};
     },
-    enabled: isAuthenticated && isHydrated,
+    enabled: isAuthenticated && isHydrated && role !== null,
     staleTime: 1000 * 60 * 5,
     retry: false,
   });
 
-  /* ── Sync fetched user back into store ── */
   useEffect(() => {
-    if (data?.data === undefined || role === null) return;
+    if (!data || role === null) return;
 
-    if (role === 'USER' && data.data.user !== undefined) {
-      // TypeScript knows fetchedUser is IUser here — .subscription exists
-      const fetchedUser = data.data.user;
+    if (role === 'USER' && data.user !== undefined) {
+      const fetchedUser = data.user;
       const userPlan = fetchedUser.subscription?.plan ?? 'FREE';
       setUser(fetchedUser, 'USER', userPlan);
       return;
     }
 
-    if (role === 'ORGANIZATION' && data.data.organization !== undefined) {
-      // TypeScript knows fetchedUser is IOrganization here
-      setUser(data.data.organization, 'ORGANIZATION');
+    if (role === 'ORGANIZATION' && data.organization !== undefined) {
+      setUser(data.organization, 'ORGANIZATION');
       return;
     }
 
-    if (role === 'ADMIN' && data.data.admin !== undefined) {
-      // TypeScript knows fetchedUser is IAdmin here
-      setUser(data.data.admin, 'ADMIN');
+    if (role === 'ADMIN' && data.admin !== undefined) {
+      setUser(data.admin, 'ADMIN');
     }
   }, [data, role, setUser]);
 
-  /* If /me returns 401 even after refresh-token attempt, clear auth */
   useEffect(() => {
     if (isError && isAuthenticated) {
       clearAuth();
@@ -98,8 +93,8 @@ export function useAuth(): {
     isUser: isUser(),
     isOrg: isOrg(),
     isAdmin: isAdmin(),
-    currentUser: getUser(),
-    currentOrg: getOrg(),
-    currentAdmin: getAdmin(),
+    currentUser: role === 'USER' ? (getUser() ?? data?.user ?? null) : null,
+    currentOrg: role === 'ORGANIZATION' ? (getOrg() ?? data?.organization ?? null) : null,
+    currentAdmin: role === 'ADMIN' ? (getAdmin() ?? data?.admin ?? null) : null,
   };
 }

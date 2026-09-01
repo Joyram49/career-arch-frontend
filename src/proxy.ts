@@ -148,7 +148,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   if (matchesPrefix(pathname, AUTH_PREFIXES)) {
     // if token is valid then redirect to dashboard
     if (!tokenMissingOrExpired && userRole) {
-      return NextResponse.redirect(new URL(ROLE_HOME[userRole] ?? '/dashboard', request.url));
+      return NextResponse.redirect(new URL(`${ROLE_HOME[userRole]}/dashboard`, request.url));
     }
     return NextResponse.next();
   }
@@ -189,7 +189,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
       // Role mismatch check
       if (userRole && userRole !== requiredRole) {
-        return NextResponse.redirect(new URL(ROLE_HOME[userRole] ?? '/dashboard', request.url));
+        return NextResponse.redirect(new URL(`${ROLE_HOME[userRole]}/dashboard`, request.url));
       }
 
       return buildNextResponse(request, newToken, setCookies);
@@ -197,7 +197,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
     // Token valid but mismatched
     if (userRole && userRole !== requiredRole) {
-      return NextResponse.redirect(new URL(ROLE_HOME[userRole] ?? '/dashboard', request.url));
+      return NextResponse.redirect(new URL(`${ROLE_HOME[userRole]}/dashboard`, request.url));
     }
 
     return NextResponse.next();
