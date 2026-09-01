@@ -1,10 +1,31 @@
 // src/lib/axios/modules/admin.api.ts
+import {
+  type ChartRange,
+  type IAdminDashboardStats,
+  type IRegistrationChartData,
+} from '@app-types/admin/admin.dashboard';
 import type { IApiResponse, IPaginationMeta } from '@app-types/api';
 import client from '../client';
 
 const admin = {
   dashboard: {
-    getStats: () => client.get<IApiResponse<{ stats: unknown }>>('/admin/dashboard/stats'),
+    getStats: () =>
+      client.get<IApiResponse<{ stats: IAdminDashboardStats }>>('/admin/dashboard/stats'),
+    getRegistrationChartData: (range: ChartRange) =>
+      client.get<IApiResponse<{ chartData: IRegistrationChartData }>>(
+        `/admin/dashboard/registration-chart`,
+        { params: { range } },
+      ),
+    getRevenueTrend: (range: RevenueTrendRange) =>
+      client.get<IApiResponse<{ revenueTrend: IRevenueTrendData }>>(
+        '/admin/dashboard/revenue-trend',
+        { params: { range } },
+      ),
+    getRevenueByPlan: (range: ChartRange) =>
+      client.get<IApiResponse<{ revenueByPlan: IRevenueByPlanData }>>(
+        '/admin/dashboard/revenue-by-plan',
+        { params: { range } },
+      ),
   },
 
   users: {
