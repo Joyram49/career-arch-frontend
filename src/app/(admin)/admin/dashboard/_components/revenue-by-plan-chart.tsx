@@ -37,8 +37,6 @@ export function RevenueByPlanChart(): React.JSX.Element {
     staleTime: 1000 * 60 * 5,
   });
 
-  console.log('RevenueByPlanChart data:', data);
-
   const chartData = (data?.breakdown ?? []).map((b: { plan: PlanKey; amountCents: number }) => ({
     name: b.plan,
     value: b.amountCents / 100,
