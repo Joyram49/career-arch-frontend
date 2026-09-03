@@ -8,8 +8,8 @@ import {
   type RevenueTrendRange,
 } from '@app-types/admin/admin.dashboard';
 import {
-  type AdminUsersFilters,
   type IAdminUserListItem,
+  type IAdminUsersFilters,
 } from '@app-types/admin/admin.dashboard.users';
 import type { IApiResponse, IPaginationMeta } from '@app-types/api';
 import client from '../client';
@@ -36,7 +36,7 @@ const admin = {
   },
 
   users: {
-    list: (params: AdminUsersFilters) =>
+    list: (params: IAdminUsersFilters) =>
       client.get<IApiResponse<{ users: IAdminUserListItem[]; meta: IPaginationMeta }>>(
         '/admin/users',
         { params },

@@ -1,11 +1,9 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 'use client';
 
 import {
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
   type ColumnDef,
   type SortingState,
@@ -23,106 +21,19 @@ import {
   StatusBadge,
 } from '../_components/shared';
 
+import {
+  type IAdminUserListItem,
+  type IAdminUsersFilters,
+} from '@app-types/admin/admin.dashboard.users';
+import { type PlanName } from '@app-types/auth';
+import { useDebounce } from '@hooks/use-debounce';
+import { APIKit } from '@lib/axios';
 import { cn } from '@lib/utils';
-
-/* ── Types ─────────────────────────────────────────────────── */
-type UserStatus = 'active' | 'suspended' | 'archived';
-type PlanName = 'free' | 'basic' | 'premium';
-
-interface AdminUser {
-  id: string;
-  name: string;
-  email: string;
-  plan: PlanName;
-  status: UserStatus;
-  joined: string;
-  lastLogin: string;
-  applications: number;
-}
-
-/* ── Mock data ─────────────────────────────────────────────── */
-const MOCK_USERS: AdminUser[] = [
-  {
-    id: '1',
-    name: 'John Smith',
-    email: 'john@email.com',
-    plan: 'premium',
-    status: 'active',
-    joined: '12 Jan 2025',
-    lastLogin: '2 hr ago',
-    applications: 38,
-  },
-  {
-    id: '2',
-    name: 'Sarah Lee',
-    email: 'sarah@email.com',
-    plan: 'basic',
-    status: 'active',
-    joined: '3 Feb 2025',
-    lastLogin: '1 day ago',
-    applications: 14,
-  },
-  {
-    id: '3',
-    name: 'Mike Johnson',
-    email: 'mike@email.com',
-    plan: 'free',
-    status: 'active',
-    joined: '18 Mar 2025',
-    lastLogin: '5 hr ago',
-    applications: 4,
-  },
-  {
-    id: '4',
-    name: 'Emma Wilson',
-    email: 'emma@email.com',
-    plan: 'premium',
-    status: 'suspended',
-    joined: '5 Apr 2025',
-    lastLogin: '3 days ago',
-    applications: 21,
-  },
-  {
-    id: '5',
-    name: 'David Park',
-    email: 'david@email.com',
-    plan: 'basic',
-    status: 'active',
-    joined: '22 Apr 2025',
-    lastLogin: '10 min ago',
-    applications: 9,
-  },
-  {
-    id: '6',
-    name: 'Amy Chen',
-    email: 'amy@email.com',
-    plan: 'free',
-    status: 'active',
-    joined: '1 May 2025',
-    lastLogin: '2 days ago',
-    applications: 2,
-  },
-  {
-    id: '7',
-    name: 'Bob Martinez',
-    email: 'bob@email.com',
-    plan: 'basic',
-    status: 'archived',
-    joined: '15 Jan 2025',
-    lastLogin: '30 days ago',
-    applications: 7,
-  },
-  {
-    id: '8',
-    name: 'Lisa Brown',
-    email: 'lisa@email.com',
-    plan: 'premium',
-    status: 'active',
-    joined: '9 Feb 2025',
-    lastLogin: '1 hr ago',
-    applications: 45,
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import { format } from 'date-fns';
+import { UsersEmptyState } from './_components/admin-users-table-empty';
+import { UsersErrorState } from './_components/admin-users-table-error';
+import { UsersTableSkeleton } from './_components/admin-users-table-skeleton';
 
 /* ── Variants ─────────────────────────────────────────────── */
 const pageVariants: Variants = {
@@ -136,9 +47,9 @@ const pageVariants: Variants = {
 
 /* ── Plan badge ─────────────────────────────────────────────── */
 const PLAN_STYLES: Record<PlanName, string> = {
-  free: 'bg-slate-100 text-slate-500 border border-slate-200',
-  basic: 'bg-sky-50 text-sky-700 border border-sky-200',
-  premium: 'bg-amber-50 text-amber-700 border border-amber-200',
+  FREE: 'bg-slate-100 text-slate-500 border border-slate-200',
+  BASIC: 'bg-sky-50 text-sky-700 border border-sky-200',
+  PREMIUM: 'bg-amber-50 text-amber-700 border border-amber-200',
 };
 
 /* ── Page ─────────────────────────────────────────────────── */
@@ -147,48 +58,104 @@ export default function AdminUsersPage(): React.JSX.Element {
   const [statusFilter, setStatus] = useState('');
   const [planFilter, setPlan] = useState('');
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [archiveTarget, setArchiveTarget] = useState<AdminUser | null>(null);
-  const [suspendTarget, setSuspendTarget] = useState<AdminUser | null>(null);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(8);
+  const [selectedUser, setSelectedUser] = useState<IAdminUserListItem | null>(null);
 
-  const filtered = useMemo(() => {
-    return MOCK_USERS.filter((u) => {
-      const matchSearch =
-        !search ||
-        u.name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase());
-      const matchStatus = !statusFilter || u.status === statusFilter;
-      const matchPlan = !planFilter || u.plan === planFilter;
-      return matchSearch && matchStatus && matchPlan;
-    });
-  }, [search, statusFilter, planFilter]);
+  const [archiveTarget, setArchiveTarget] = useState<IAdminUserListItem | null>(null);
 
-  const columns = useMemo<ColumnDef<AdminUser>[]>(
+  const [suspendTarget, setSuspendTarget] = useState<IAdminUserListItem | null>(null);
+
+  const debouncedSearch = useDebounce(search, 500);
+
+  const queryParams = useMemo<IAdminUsersFilters>(
+    () => ({
+      page,
+      limit,
+      search: debouncedSearch || undefined,
+
+      isActive: statusFilter === 'active' ? true : statusFilter === 'suspended' ? false : undefined,
+
+      plan: planFilter ? (planFilter.toUpperCase() as IAdminUsersFilters['plan']) : undefined,
+
+      sortBy: sorting[0]?.id as IAdminUsersFilters['sortBy'] | undefined,
+
+      sortOrder: sorting[0] ? (sorting[0].desc ? 'desc' : 'asc') : undefined,
+    }),
+    [page, limit, debouncedSearch, statusFilter, planFilter, sorting],
+  );
+
+  const { data, isLoading, isFetching, isError, refetch } = useQuery({
+    queryKey: ['admin-users', queryParams],
+
+    queryFn: async () => {
+      const response = await APIKit.admin.users.list(queryParams);
+
+      return response.data;
+    },
+
+    placeholderData: (previousData) => previousData,
+  });
+
+  const users = data?.data?.users ?? [];
+  const meta = data?.meta;
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setStatus(value);
+    setPage(1);
+  };
+
+  const handlePlanChange = (value: string) => {
+    setPlan(value);
+    setPage(1);
+  };
+
+  const columns = useMemo<ColumnDef<IAdminUserListItem>[]>(
     () => [
       {
-        accessorKey: 'name',
+        id: 'user',
         header: 'User',
-        cell: ({ row }) => (
-          <div className="flex items-center gap-3">
-            <div className="flex size-8 items-center justify-center rounded-full bg-brand-sky/15 text-xs font-bold text-brand-sky">
-              {row.original.name
-                .split(' ')
-                .map((n) => n[0])
-                .join('')
-                .slice(0, 2)}
+        enableSorting: false,
+        cell: ({ row }) => {
+          const user = row.original;
+
+          const name = user.profile
+            ? `${user.profile.firstName} ${user.profile.lastName}`
+            : 'Unknown User';
+
+          return (
+            <div className="flex items-center gap-3">
+              <div className="flex size-8 items-center justify-center rounded-full bg-brand-sky/15 text-xs font-bold text-brand-sky">
+                {name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join('')
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold text-foreground">{name}</p>
+
+                <p className="text-[11px] text-muted-foreground">{user.email}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground">{row.original.name}</p>
-              <p className="text-[11px] text-muted-foreground">{row.original.email}</p>
-            </div>
-          </div>
-        ),
+          );
+        },
       },
+
       {
-        accessorKey: 'plan',
+        accessorKey: 'subscription.plan',
         header: 'Plan',
-        cell: ({ getValue }) => {
-          const plan = getValue<PlanName>();
+        enableSorting: false,
+        cell: ({ row }) => {
+          const plan = row.original.subscription?.plan ?? 'FREE';
+
           return (
             <span
               className={cn(
@@ -201,30 +168,46 @@ export default function AdminUsersPage(): React.JSX.Element {
           );
         },
       },
+
       {
-        accessorKey: 'status',
+        id: 'status',
         header: 'Status',
-        cell: ({ getValue }) => <StatusBadge status={getValue<UserStatus>()} />,
+        enableSorting: false,
+        cell: ({ row }) => <StatusBadge status={row.original.isActive ? 'active' : 'suspended'} />,
       },
+
       {
-        accessorKey: 'joined',
+        accessorKey: 'createdAt',
         header: 'Joined',
-        cell: ({ getValue }) => (
-          <span className="text-xs text-muted-foreground">{getValue<string>()}</span>
+        enableSorting: true,
+        cell: ({ row }) => (
+          <span className="text-xs text-muted-foreground">
+            {new Date(row.original.createdAt).toLocaleDateString()}
+          </span>
         ),
       },
+
       {
-        accessorKey: 'lastLogin',
+        accessorKey: 'lastLoginAt',
         header: 'Last Login',
-        cell: ({ getValue }) => (
-          <span className="text-xs text-muted-foreground">{getValue<string>()}</span>
+        enableSorting: true,
+        cell: ({ row }) => (
+          <span className="text-xs text-muted-foreground">
+            {row.original.lastLoginAt
+              ? new Date(row.original.lastLoginAt).toLocaleDateString()
+              : 'Never'}
+          </span>
         ),
       },
+
       {
-        accessorKey: 'applications',
+        id: 'applications',
         header: 'Applications',
-        cell: ({ getValue }) => (
-          <span className="text-sm font-semibold text-foreground">{getValue<number>()}</span>
+        enableSorting: false,
+        cell: ({ row }) => (
+          <span className="text-sm font-semibold text-foreground">
+            {row.original._count.applications}
+          </span>
         ),
       },
       {
@@ -242,7 +225,7 @@ export default function AdminUsersPage(): React.JSX.Element {
               >
                 View
               </Button>
-              {u.status === 'active' && (
+              {u.isActive === true && (
                 <Button
                   size="sm"
                   variant="outline"
@@ -252,7 +235,7 @@ export default function AdminUsersPage(): React.JSX.Element {
                   Suspend
                 </Button>
               )}
-              {u.status === 'suspended' && (
+              {u.isActive === false && (
                 <Button
                   size="sm"
                   variant="outline"
@@ -262,7 +245,7 @@ export default function AdminUsersPage(): React.JSX.Element {
                   Activate
                 </Button>
               )}
-              {u.status !== 'archived' && (
+              {u.isEmailVerified === false && (
                 <Button
                   size="sm"
                   variant="outline"
@@ -280,17 +263,27 @@ export default function AdminUsersPage(): React.JSX.Element {
     [],
   );
 
+  // TanStack Table returns an intentionally mutable table instance; React
+  // Compiler must not attempt to memoize this hook call.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
-    data: filtered,
+    data: users,
     columns,
-    state: { sorting },
-    onSortingChange: setSorting,
+    state: {
+      sorting,
+    },
+    onSortingChange: (updater) => {
+      setSorting(updater);
+      setPage(1);
+    },
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: { pagination: { pageSize: 8 } },
+    manualSorting: true,
+    manualPagination: true,
+    pageCount: meta?.totalPages ?? 0,
+    enableMultiSort: false,
   });
+
+  const hasFilters = Boolean(debouncedSearch) || Boolean(statusFilter) || Boolean(planFilter);
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
@@ -302,21 +295,21 @@ export default function AdminUsersPage(): React.JSX.Element {
       <SearchFilterBar
         searchPlaceholder="Search by name or email…"
         searchValue={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
       >
         <FilterSelect
           value={statusFilter}
-          onChange={setStatus}
+          onChange={handleStatusChange}
           placeholder="All Statuses"
           options={[
             { label: 'Active', value: 'active' },
             { label: 'Suspended', value: 'suspended' },
-            { label: 'Archived', value: 'archived' },
           ]}
         />
+
         <FilterSelect
           value={planFilter}
-          onChange={setPlan}
+          onChange={handlePlanChange}
           placeholder="All Plans"
           options={[
             { label: 'Free', value: 'free' },
@@ -325,6 +318,15 @@ export default function AdminUsersPage(): React.JSX.Element {
           ]}
         />
       </SearchFilterBar>
+
+      <div className="flex h-8 items-center justify-end px-5 py-2">
+        {isFetching && !isLoading && (
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <i className="ti ti-loader-2 animate-spin" aria-hidden="true" />
+            Updating...
+          </div>
+        )}
+      </div>
 
       <motion.div
         className="flex flex-1 flex-col overflow-hidden"
@@ -359,13 +361,18 @@ export default function AdminUsersPage(): React.JSX.Element {
               ))}
             </thead>
             <tbody className="divide-y divide-border bg-card">
-              {table.getRowModel().rows.length === 0 ? (
+              {isLoading ? (
+                <UsersTableSkeleton rows={limit} />
+              ) : isError ? (
                 <tr>
-                  <td
-                    colSpan={columns.length}
-                    className="px-5 py-12 text-center text-sm text-muted-foreground"
-                  >
-                    No users found
+                  <td colSpan={columns.length}>
+                    <UsersErrorState onRetry={refetch} />
+                  </td>
+                </tr>
+              ) : users.length === 0 ? (
+                <tr>
+                  <td colSpan={columns.length}>
+                    <UsersEmptyState hasFilters={hasFilters} />
                   </td>
                 </tr>
               ) : (
@@ -383,20 +390,24 @@ export default function AdminUsersPage(): React.JSX.Element {
           </table>
         </div>
 
-        <AdminPagination
-          page={table.getState().pagination.pageIndex + 1}
-          totalPages={table.getPageCount()}
-          onPageChange={(p) => table.setPageIndex(p - 1)}
-          total={filtered.length}
-          perPage={8}
-        />
+        {!isLoading && !isError && users.length > 0 && meta && (
+          <AdminPagination
+            page={page}
+            totalPages={meta.totalPages}
+            onPageChange={setPage}
+            total={meta.total}
+            perPage={limit}
+          />
+        )}
       </motion.div>
 
       {/* User detail modal */}
       <Dialog open={selectedUser !== null} onOpenChange={() => setSelectedUser(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-foreground">{selectedUser?.name}</DialogTitle>
+            <DialogTitle className="text-foreground">
+              {selectedUser?.profile?.firstName} {selectedUser?.profile?.lastName}
+            </DialogTitle>
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-4">
@@ -407,29 +418,40 @@ export default function AdminUsersPage(): React.JSX.Element {
                 </div>
                 <div>
                   <span className="text-muted-foreground">Plan</span>
-                  <p className="font-medium text-foreground capitalize">{selectedUser.plan}</p>
+                  <p className="font-medium text-foreground capitalize">
+                    {selectedUser.subscription?.plan}
+                  </p>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Status</span>
                   <p className="mt-0.5">
-                    <StatusBadge status={selectedUser.status} />
+                    <StatusBadge status={selectedUser.isActive ? 'active' : 'suspended'} />
                   </p>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Applications</span>
-                  <p className="font-medium text-foreground">{selectedUser.applications}</p>
+                  <p className="font-medium text-foreground">{selectedUser._count.applications}</p>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Joined</span>
-                  <p className="font-medium text-foreground">{selectedUser.joined}</p>
+                  <p className="font-medium text-foreground">
+                    {' '}
+                    {selectedUser.createdAt
+                      ? format(new Date(selectedUser.createdAt), 'dd, MMM yyyy')
+                      : 'Never'}
+                  </p>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Last Login</span>
-                  <p className="font-medium text-foreground">{selectedUser.lastLogin}</p>
+                  <p className="font-medium text-foreground">
+                    {selectedUser.lastLoginAt
+                      ? format(new Date(selectedUser.lastLoginAt), 'dd, MMM yyyy')
+                      : 'Never'}
+                  </p>
                 </div>
               </div>
               <div className="flex gap-2 border-t border-border pt-3">
-                {selectedUser.status === 'active' && (
+                {selectedUser.isActive === true && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -463,7 +485,7 @@ export default function AdminUsersPage(): React.JSX.Element {
       <ArchiveConfirmDialog
         open={suspendTarget !== null}
         onOpenChange={() => setSuspendTarget(null)}
-        title={`Suspend ${suspendTarget?.name}?`}
+        title={`Suspend ${suspendTarget?.profile?.firstName}?`}
         description="This user will lose access to their account immediately. You can reactivate at any time."
         confirmLabel="Suspend User"
         variant="suspend"
@@ -474,7 +496,7 @@ export default function AdminUsersPage(): React.JSX.Element {
       <ArchiveConfirmDialog
         open={archiveTarget !== null}
         onOpenChange={() => setArchiveTarget(null)}
-        title={`Archive ${archiveTarget?.name}?`}
+        title={`Archive ${archiveTarget?.profile?.firstName}?`}
         description="The account will be archived and auto-deleted after 30 days by the background cleanup cron."
         confirmLabel="Archive Account"
         variant="archive"
