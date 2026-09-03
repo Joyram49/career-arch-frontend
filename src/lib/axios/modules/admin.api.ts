@@ -7,6 +7,10 @@ import {
   type IRevenueTrendData,
   type RevenueTrendRange,
 } from '@app-types/admin/admin.dashboard';
+import {
+  type AdminUsersFilters,
+  type IAdminUserListItem,
+} from '@app-types/admin/admin.dashboard.users';
 import type { IApiResponse, IPaginationMeta } from '@app-types/api';
 import client from '../client';
 
@@ -32,14 +36,26 @@ const admin = {
   },
 
   users: {
-    getAll: (params?: Record<string, unknown>) =>
-      client.get<IApiResponse<IPaginationMeta>>('/admin/users', { params }),
+    list: (params: AdminUsersFilters) =>
+      client.get<IApiResponse<{ users: IAdminUserListItem[]; meta: IPaginationMeta }>>(
+        '/admin/users',
+        { params },
+      ),
 
-    getById: (id: string) => client.get<IApiResponse<{ user: unknown }>>(`/admin/users/${id}`),
+    getById: (id: string) =>
+      client.get<IApiResponse<{ user: IAdminUserListItem }>>(`/admin/users/${id}`),
 
-    suspend: (id: string) => client.patch<IApiResponse<null>>(`/admin/users/${id}/suspend`),
+    suspend: (id: string, reason?: string) =>
+      client.patch<IApiResponse<{ id: string; email: string; isActive: boolean }>>(
+        `/admin/users/${id}/suspend`,
+        { reason },
+      ),
 
-    activate: (id: string) => client.patch<IApiResponse<null>>(`/admin/users/${id}/activate`),
+    activate: (id: string, reason?: string) =>
+      client.patch<IApiResponse<{ id: string; email: string; isActive: boolean }>>(
+        `/admin/users/${id}/activate`,
+        { reason },
+      ),
   },
 
   organizations: {

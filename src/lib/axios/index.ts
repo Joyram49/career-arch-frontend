@@ -1,4 +1,3 @@
-// src/lib/axios/index.ts
 import client from './client';
 import admin from './modules/admin.api';
 import applications from './modules/applications.api';
