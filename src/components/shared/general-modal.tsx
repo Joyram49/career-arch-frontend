@@ -67,6 +67,7 @@ export type ModalActionVariant =
 
 export interface ModalAction {
   label: string;
+  className?: string;
   onClick: () => void;
   variant?: ModalActionVariant;
   isLoading?: boolean;

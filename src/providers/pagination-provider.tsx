@@ -63,7 +63,7 @@ interface PaginationProviderProps {
   /** Controlled mode — pass together with onPageChange to sync with the URL. */
   page?: number;
   limit?: number;
-  total?: numbger;
+  total?: number;
   onPageChange?: (page: number) => void;
   onLimitChange?: (limit: number) => void;
 }
