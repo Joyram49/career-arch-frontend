@@ -8,6 +8,10 @@ import {
   type RevenueTrendRange,
 } from '@app-types/admin/admin.dashboard';
 import {
+  type IAdminJobListItem,
+  type IAdminJobsFilters,
+} from '@app-types/admin/admin.dashboard.jobs';
+import {
   type IAdminOrgListItem,
   type IAdminOrganizationsFilters,
 } from '@app-types/admin/admin.dashboard.orgs';
@@ -78,10 +82,19 @@ const admin = {
   },
 
   jobs: {
-    getAll: (params?: Record<string, unknown>) =>
-      client.get<IApiResponse<IPaginationMeta>>('/admin/jobs', { params }),
+    getAll: (params: IAdminJobsFilters) =>
+      client.get<IApiResponse<{ jobs: IAdminJobListItem[]; meta: IPaginationMeta }>>(
+        '/admin/jobs',
+        { params },
+      ),
 
-    takedown: (id: string) => client.patch<IApiResponse<null>>(`/admin/jobs/${id}/takedown`),
+    takedown: (id: string, reason: string) =>
+      client.patch<IApiResponse<null>>(`/admin/jobs/${id}/takedown`, { reason }),
+
+    republish: (id: string) => client.patch<IApiResponse<null>>(`/admin/jobs/${id}/republish`),
+
+    archive: (id: string, reason?: string) =>
+      client.patch<IApiResponse<null>>(`/admin/jobs/${id}/archive`, { reason }),
   },
 
   plans: {
