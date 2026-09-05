@@ -21,6 +21,7 @@ import { AdminPageHeader } from '../../_components/shared';
 import { AdminSubscriptionCancelModal } from './admin-subscription-cancel-modal';
 import { AdminSubscriptionRefundModal } from './admin-subscription-refund-modal';
 import { AdminSubscriptionsFilters } from './admin-subscriptions-filters';
+import { AdminSubscriptionsStats } from './admin-subscriptions-stats';
 import { AdminSubscriptionsTable } from './admin-subscriptions-table';
 
 const pageVariants: Variants = {
@@ -131,6 +132,7 @@ export default function AdminSubscriptionsContainer(): React.JSX.Element {
         initial="hidden"
         animate="visible"
       >
+        <AdminSubscriptionsStats />
         <AdminSubscriptionsTable
           subscriptions={subscriptions}
           isLoading={isLoading}
