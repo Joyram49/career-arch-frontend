@@ -16,6 +16,11 @@ import {
   type IAdminOrganizationsFilters,
 } from '@app-types/admin/admin.dashboard.orgs';
 import {
+  type IAdminSubscriptionListItem,
+  type IAdminSubscriptionStats,
+  type IAdminSubscriptionsFilters,
+} from '@app-types/admin/admin.dashboard.subscriptions';
+import {
   type IAdminUserListItem,
   type IAdminUsersFilters,
 } from '@app-types/admin/admin.dashboard.users';
@@ -114,13 +119,18 @@ const admin = {
   },
 
   subscriptions: {
-    getAll: (params?: Record<string, unknown>) =>
-      client.get<IApiResponse<IPaginationMeta>>('/admin/subscriptions', { params }),
+    getAll: (params: IAdminSubscriptionsFilters) =>
+      client.get<
+        IApiResponse<{ subscriptions: IAdminSubscriptionListItem[]; meta: IPaginationMeta }>
+      >('/admin/subscriptions', { params }),
 
-    getStats: () => client.get<IApiResponse<{ stats: unknown }>>('/admin/subscriptions/stats'),
+    getStats: () =>
+      client.get<IApiResponse<{ stats: IAdminSubscriptionStats }>>('/admin/subscriptions/stats'),
 
     getById: (id: string) =>
-      client.get<IApiResponse<{ subscription: unknown }>>(`/admin/subscriptions/${id}`),
+      client.get<IApiResponse<{ subscription: IAdminSubscriptionListItem }>>(
+        `/admin/subscriptions/${id}`,
+      ),
 
     cancel: (id: string) => client.post<IApiResponse<null>>(`/admin/subscriptions/${id}/cancel`),
 
