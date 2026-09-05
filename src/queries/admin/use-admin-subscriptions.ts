@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 'use client';
 
-import type { ApiErrorResponse } from '@app-types/api';
+import type { IApiErrorResponse } from '@app-types/api';
 import { APIKit } from '@lib/axios';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
@@ -30,7 +30,7 @@ export function useCancelSubscription() {
       // Cancelling changes byPlan counts + mrrCents — stats must refresh too.
       void queryClient.invalidateQueries({ queryKey: ['admin-subscription-stats'] });
     },
-    onError: (error: AxiosError<ApiErrorResponse>) => {
+    onError: (error: AxiosError<IApiErrorResponse>) => {
       toast.error(error.response?.data?.message ?? 'Failed to cancel subscription');
     },
   });
@@ -50,7 +50,7 @@ export function useRefundSubscription() {
       // (mrrCents etc.) are unaffected, but list amount could theoretically
       // still be re-derived, so we invalidate the list only, not stats.
     },
-    onError: (error: AxiosError<ApiErrorResponse>) => {
+    onError: (error: AxiosError<IApiErrorResponse>) => {
       toast.error(error.response?.data?.message ?? 'Failed to issue refund');
     },
   });
