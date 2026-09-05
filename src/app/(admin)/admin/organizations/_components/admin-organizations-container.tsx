@@ -48,8 +48,6 @@ export default function AdminOrganizationsContainer(): React.JSX.Element {
   const { page, limit, search, isApproved, isActive, hasUnpaidIncentives, sortBy, sortOrder } =
     params;
 
-  console.log(params);
-
   const [searchInput, setSearchInput] = useState(search ?? '');
   const isFirstSearchRender = useRef(true);
   const debouncedSearch = useDebounce(searchInput, 500);

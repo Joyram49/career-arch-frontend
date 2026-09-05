@@ -84,3 +84,14 @@ export const adminJobsQuerySchema = z.object({
 });
 
 export type AdminJobsQueryParams = z.infer<typeof adminJobsQuerySchema>;
+
+// ── Admin Subscriptions Query Schema ──────────────────────────────────────────────
+export const adminSubscriptionsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  plan: z.enum(['FREE', 'BASIC', 'PREMIUM']).optional(),
+  status: z.enum(['ACTIVE', 'INACTIVE', 'CANCELLED', 'PAST_DUE']).optional(),
+  search: z.string().trim().min(1).optional(),
+});
+
+export type AdminSubscriptionsQueryParams = z.infer<typeof adminSubscriptionsQuerySchema>;
