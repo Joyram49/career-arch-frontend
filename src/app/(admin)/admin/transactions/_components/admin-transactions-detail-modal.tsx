@@ -20,7 +20,7 @@ export function AdminTransactionDetailModal({
   const { data, isLoading } = useQuery({
     queryKey: ['admin-transaction', transaction?.id],
     queryFn: async () => {
-      const response = await APIKit.admin.transactions.getById(transaction?.id);
+      const response = await APIKit.admin.transactions.getById(transaction?.id as string);
       return response.data;
     },
     enabled: transaction !== null,

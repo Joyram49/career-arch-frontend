@@ -31,6 +31,7 @@ import {
   type IAdminTransactionStats,
   type IAdminTransactionsFilters,
   type IRevenueTimelineData,
+  type TransactionsChartRange,
 } from '@app-types/admin/admin.dashboard.transactions';
 import {
   type IAdminUserListItem,
