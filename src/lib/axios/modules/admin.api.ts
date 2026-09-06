@@ -26,6 +26,14 @@ import {
   type IAdminSubscriptionsFilters,
 } from '@app-types/admin/admin.dashboard.subscriptions';
 import {
+  type IAdminTransactionDetail,
+  type IAdminTransactionListItem,
+  type IAdminTransactionStats,
+  type IAdminTransactionsFilters,
+  type IRevenueTimelineData,
+  type TransactionsChartRange,
+} from '@app-types/admin/admin.dashboard.transactions';
+import {
   type IAdminUserListItem,
   type IAdminUsersFilters,
 } from '@app-types/admin/admin.dashboard.users';
@@ -161,6 +169,25 @@ const admin = {
 
     resolveDispute: (id: string, payload: { resolution: 'collect' | 'waive'; note?: string }) =>
       client.post<IApiResponse<null>>(`/admin/incentives/${id}/resolve-dispute`, payload),
+  },
+  transactions: {
+    list: (params: IAdminTransactionsFilters) =>
+      client.get<
+        IApiResponse<{ transactions: IAdminTransactionListItem[]; meta: IPaginationMeta }>
+      >('/admin/transactions', { params }),
+
+    getStats: () =>
+      client.get<IApiResponse<{ stats: IAdminTransactionStats }>>('/admin/transactions/stats'),
+
+    getChart: (range: TransactionsChartRange) =>
+      client.get<IApiResponse<{ timeline: IRevenueTimelineData }>>('/admin/transactions/chart', {
+        params: { range },
+      }),
+
+    getById: (id: string) =>
+      client.get<IApiResponse<{ transaction: IAdminTransactionDetail }>>(
+        `/admin/transactions/${id}`,
+      ),
   },
   me: {
     getMe: () => client.get<IApiResponse>('/auth/admin/me'),
