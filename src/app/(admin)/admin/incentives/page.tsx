@@ -10,4 +10,5 @@ export default function AdminIncentivesPage(): React.JSX.Element {
       <AdminIncentivesContainer />
     </QueryParamsProvider>
   );
+  ``;
 }

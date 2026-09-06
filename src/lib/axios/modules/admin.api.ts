@@ -8,6 +8,11 @@ import {
   type RevenueTrendRange,
 } from '@app-types/admin/admin.dashboard';
 import {
+  type IAdminIncentiveListItem,
+  type IAdminIncentiveStats,
+  type IAdminIncentivesFilters,
+} from '@app-types/admin/admin.dashboard.incentives';
+import {
   type IAdminJobListItem,
   type IAdminJobsFilters,
 } from '@app-types/admin/admin.dashboard.jobs';
