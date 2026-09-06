@@ -139,20 +139,23 @@ const admin = {
   },
 
   incentives: {
-    getAll: (params?: Record<string, unknown>) =>
-      client.get<IApiResponse<IPaginationMeta>>('/admin/incentives', {
-        params,
-      }),
+    getAll: (params: IAdminIncentivesFilters) =>
+      client.get<IApiResponse<{ incentives: IAdminIncentiveListItem[]; meta: IPaginationMeta }>>(
+        '/admin/incentives',
+        { params },
+      ),
 
-    getStats: () => client.get<IApiResponse<{ stats: unknown }>>('/admin/incentives/stats'),
+    getStats: () =>
+      client.get<IApiResponse<{ stats: IAdminIncentiveStats }>>('/admin/incentives/stats'),
 
     getById: (id: string) =>
-      client.get<IApiResponse<{ incentive: unknown }>>(`/admin/incentives/${id}`),
+      client.get<IApiResponse<{ incentive: IAdminIncentiveListItem }>>(`/admin/incentives/${id}`),
 
-    waive: (id: string) => client.post<IApiResponse<null>>(`/admin/incentives/${id}/waive`),
+    waive: (id: string, reason: string) =>
+      client.post<IApiResponse<null>>(`/admin/incentives/${id}/waive`, { reason }),
 
-    resolveDispute: (id: string) =>
-      client.post<IApiResponse<null>>(`/admin/incentives/${id}/resolve-dispute`),
+    resolveDispute: (id: string, payload: { resolution: 'collect' | 'waive'; note?: string }) =>
+      client.post<IApiResponse<null>>(`/admin/incentives/${id}/resolve-dispute`, payload),
   },
   me: {
     getMe: () => client.get<IApiResponse>('/auth/admin/me'),
