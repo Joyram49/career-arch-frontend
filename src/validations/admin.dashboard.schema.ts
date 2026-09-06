@@ -109,3 +109,15 @@ export const adminIncentivesQuerySchema = z.object({
 });
 
 export type AdminIncentivesQueryParams = z.infer<typeof adminIncentivesQuerySchema>;
+
+export const adminTransactionsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  search: z.string().optional(),
+  type: z.enum(['SUBSCRIPTION', 'REFUND', 'INCENTIVE', 'OTHER']).optional(),
+  status: z.enum(['PENDING', 'SUCCEEDED', 'FAILED', 'REFUNDED']).optional(),
+  sortBy: z.enum(['createdAt', 'amount']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
+});
+
+export type AdminTransactionsQueryParams = z.infer<typeof adminTransactionsQuerySchema>;
