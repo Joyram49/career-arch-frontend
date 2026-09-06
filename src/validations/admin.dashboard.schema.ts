@@ -95,3 +95,17 @@ export const adminSubscriptionsQuerySchema = z.object({
 });
 
 export type AdminSubscriptionsQueryParams = z.infer<typeof adminSubscriptionsQuerySchema>;
+
+// ── Admin Incentives Query Schema ──────────────────────────────────────────
+export const adminIncentivesQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  status: z.enum(['PENDING', 'PAID', 'WAIVED', 'DISPUTED', 'OVERDUE']).optional(),
+  orgId: z.string().uuid().optional(),
+  // Keyword search — org (company) name or candidate first/last name/email
+  search: z.string().trim().min(1).optional(),
+  sortBy: z.enum(['createdAt', 'dueAt', 'paidAt']).default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+});
+
+export type AdminIncentivesQueryParams = z.infer<typeof adminIncentivesQuerySchema>;
