@@ -21,6 +21,11 @@ import {
   type IAdminOrganizationsFilters,
 } from '@app-types/admin/admin.dashboard.orgs';
 import {
+  type IAdminPlanListItem,
+  type ICreatePlanPayload,
+  type IUpdatePlanPayload,
+} from '@app-types/admin/admin.dashboard.plans';
+import {
   type IAdminSubscriptionListItem,
   type IAdminSubscriptionStats,
   type IAdminSubscriptionsFilters,
@@ -116,17 +121,19 @@ const admin = {
   },
 
   plans: {
-    getAll: () => client.get<IApiResponse<{ plans: unknown[] }>>('/admin/plans'),
+    getAll: () => client.get<IApiResponse<{ plans: IAdminPlanListItem[] }>>('/admin/plans'),
 
-    getById: (id: string) => client.get<IApiResponse<{ plan: unknown }>>(`/admin/plans/${id}`),
+    getById: (id: string) =>
+      client.get<IApiResponse<{ plan: IAdminPlanListItem }>>(`/admin/plans/${id}`),
 
-    create: (payload: Record<string, unknown>) =>
-      client.post<IApiResponse<{ plan: unknown }>>('/admin/plans', payload),
+    create: (payload: ICreatePlanPayload) =>
+      client.post<IApiResponse<{ plan: IAdminPlanListItem }>>('/admin/plans', payload),
 
-    update: (id: string, payload: Record<string, unknown>) =>
-      client.put<IApiResponse<{ plan: unknown }>>(`/admin/plans/${id}`, payload),
+    update: (id: string, payload: IUpdatePlanPayload) =>
+      client.put<IApiResponse<{ plan: IAdminPlanListItem }>>(`/admin/plans/${id}`, payload),
 
-    toggle: (id: string) => client.patch<IApiResponse<null>>(`/admin/plans/${id}/toggle`),
+    toggle: (id: string) =>
+      client.patch<IApiResponse<{ plan: IAdminPlanListItem }>>(`/admin/plans/${id}/toggle`),
 
     delete: (id: string) => client.delete<IApiResponse<null>>(`/admin/plans/${id}`),
   },
