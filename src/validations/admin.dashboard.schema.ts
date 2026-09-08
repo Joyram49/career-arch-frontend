@@ -121,3 +121,30 @@ export const adminTransactionsQuerySchema = z.object({
 });
 
 export type AdminTransactionsQueryParams = z.infer<typeof adminTransactionsQuerySchema>;
+
+// ── Feature flags — mirrors backend planFeaturesSchema exactly ─────────────
+// -1 is the sentinel for "unlimited" across limit fields (matches backend contract).
+export const adminPlanFeaturesSchema = z.object({
+  jobBrowseLimit: z.number().int().min(-1),
+  applyMonthlyLimit: z.number().int().min(-1),
+  saveJobsLimit: z.number().int().min(-1),
+  canViewOrgProfile: z.boolean(),
+  resumeVersions: z.number().int().min(-1),
+  canDownloadHistory: z.boolean(),
+  earlyJobAlerts: z.boolean(),
+  prioritySearch: z.boolean(),
+  aiResumeTips: z.boolean(),
+  badge: z.enum(['basic', 'premium']).nullable(),
+});
+
+// ── Single form schema used for both create and edit ────────────────────────
+// `key` is disabled on the input in edit mode but still validated/submitted.
+export const adminPlanFormSchema = z.object({
+  key: z.enum(['BASIC', 'PREMIUM']),
+  displayName: z.string().trim().min(1, 'Display name is required').max(50),
+  description: z.string().trim().max(300).optional().or(z.literal('')),
+  monthlyPriceCents: z.number().int().min(1, 'Price must be at least 1 cent'),
+  features: adminPlanFeaturesSchema,
+});
+
+export type AdminPlanFormInput = z.infer<typeof adminPlanFormSchema>;
