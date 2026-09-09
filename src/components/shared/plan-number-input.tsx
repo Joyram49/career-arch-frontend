@@ -12,6 +12,7 @@ interface PlanNumberInputProps {
   /** Allow a fractional part while typing (e.g. price in dollars). Defaults to integer parsing. */
   allowDecimal?: boolean;
   className?: string;
+  disabled?: boolean;
 }
 
 // Plain `<input type="number" value={someNumber}>` bound directly to a numeric
@@ -31,6 +32,7 @@ export function PlanNumberInput({
   onChange,
   min,
   step,
+  disabled,
   allowDecimal = false,
   className,
 }: PlanNumberInputProps): React.JSX.Element {
@@ -56,6 +58,7 @@ export function PlanNumberInput({
       min={min}
       step={step}
       value={raw}
+      disabled={disabled}
       onChange={(e) => {
         const next = e.target.value;
         setRaw(next);
