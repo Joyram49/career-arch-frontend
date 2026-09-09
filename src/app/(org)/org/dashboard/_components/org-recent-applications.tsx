@@ -52,7 +52,7 @@ export function OrgRecentApplications(): React.JSX.Element {
       ) : isError ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center">
           <span className="text-xs text-muted-foreground">Couldn&apos;t load applications.</span>
-          <Button variant="outline" size="sm" onClick={refetch}>
+          <Button variant="outline" size="sm" onClick={() => void refetch()}>
             Retry
           </Button>
         </div>
