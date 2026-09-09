@@ -134,17 +134,25 @@ export const adminPlanFeaturesSchema = z.object({
   earlyJobAlerts: z.boolean(),
   prioritySearch: z.boolean(),
   aiResumeTips: z.boolean(),
-  badge: z.enum(['basic', 'premium']).nullable(),
+  badge: z.enum(['basic', 'premium', 'free']).nullable(),
 });
 
 // ── Single form schema used for both create and edit ────────────────────────
 // `key` is disabled on the input in edit mode but still validated/submitted.
-export const adminPlanFormSchema = z.object({
-  key: z.enum(['BASIC', 'PREMIUM']),
-  displayName: z.string().trim().min(1, 'Display name is required').max(50),
-  description: z.string().trim().max(300).optional().or(z.literal('')),
-  monthlyPriceCents: z.number().int().min(1, 'Price must be at least 1 cent'),
-  features: adminPlanFeaturesSchema,
-});
+export const adminPlanFormSchema = z
+  .object({
+    key: z.enum(['BASIC', 'PREMIUM', 'FREE']),
+    displayName: z.string().trim().min(1, 'Display name is required').max(50),
+    description: z.string().trim().max(300).optional().or(z.literal('')),
+    monthlyPriceCents: z.number().int().min(0),
+    features: adminPlanFeaturesSchema,
+  })
+  .refine(
+    (data) => (data.key === 'FREE' ? data.monthlyPriceCents === 0 : data.monthlyPriceCents > 0),
+    {
+      message: 'Price must be at least 1 cent for paid plans',
+      path: ['monthlyPriceCents'],
+    },
+  );
 
 export type AdminPlanFormInput = z.infer<typeof adminPlanFormSchema>;

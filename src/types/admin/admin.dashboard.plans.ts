@@ -13,7 +13,7 @@ export interface IAdminPlanFeatures {
   earlyJobAlerts: boolean;
   prioritySearch: boolean;
   aiResumeTips: boolean;
-  badge: 'basic' | 'premium' | null;
+  badge: 'basic' | 'premium' | 'free' | null;
 }
 
 export interface IAdminPlanListItem {
