@@ -1,6 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
 import { Controller, useForm, type Resolver } from 'react-hook-form';
 
 import { type IAdminPlanListItem } from '@app-types/admin/admin.dashboard.plans';
@@ -10,6 +11,8 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/field';
 import { Input } from '@ui/input';
 import { Switch } from '@ui/switch';
 import { Textarea } from '@ui/textarea';
+
+import { PlanNumberInput } from '@components/shared/plan-number-input';
 import { adminPlanFormSchema, type AdminPlanFormInput } from '@validations/admin.dashboard.schema';
 
 interface AdminPlanFormModalProps {
@@ -49,7 +52,7 @@ const FEATURE_TOGGLE_FIELDS: Array<{
 function buildDefaultValues(plan: IAdminPlanListItem | null): AdminPlanFormInput {
   if (plan) {
     return {
-      key: plan.key === 'FREE' ? 'BASIC' : plan.key,
+      key: plan.key,
       displayName: plan.displayName,
       description: plan.description ?? '',
       monthlyPriceCents: plan.monthlyPriceCents,
@@ -69,8 +72,8 @@ function buildDefaultValues(plan: IAdminPlanListItem | null): AdminPlanFormInput
       canViewOrgProfile: true,
       resumeVersions: 3,
       canDownloadHistory: false,
-      earlyJobAlerts: false,
-      prioritySearch: false,
+      earlyJobAlerts: true,
+      prioritySearch: true,
       aiResumeTips: false,
       badge: 'basic',
     },
@@ -83,11 +86,20 @@ export function AdminPlanFormModal({
   onClose,
 }: AdminPlanFormModalProps): React.JSX.Element {
   const isEdit = plan !== null;
+  const isFreePlan = plan?.key === 'FREE';
 
   const { control, handleSubmit, reset } = useForm<AdminPlanFormInput>({
     resolver: zodResolver(adminPlanFormSchema) as Resolver<AdminPlanFormInput>,
-    values: buildDefaultValues(plan),
+    defaultValues: buildDefaultValues(plan),
   });
+
+  // Reset the form explicitly only when *which* plan we're editing changes, or
+  // the modal (re)opens — never on every incidental re-render of this
+  // component.
+  useEffect(() => {
+    if (open) reset(buildDefaultValues(plan));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan?.id, open, reset]);
 
   const createMutation = useCreatePlan();
   const updateMutation = useUpdatePlan();
@@ -114,6 +126,12 @@ export function AdminPlanFormModal({
       );
       return;
     }
+
+    // The key select never offers FREE outside of an already-FREE edit (see
+    // the <select> options below), so this branch is create-only and 'FREE'
+    // is unreachable here — this guard just satisfies TypeScript's narrowing
+    // against ICreatePlanPayload's 'BASIC' | 'PREMIUM' key.
+    if (data.key === 'FREE') return;
 
     createMutation.mutate(
       {
@@ -174,6 +192,10 @@ export function AdminPlanFormModal({
                 >
                   <option value="BASIC">BASIC</option>
                   <option value="PREMIUM">PREMIUM</option>
+                  {/* FREE is never creatable/selectable — this option only
+                      exists so the (disabled) select correctly displays
+                      "FREE" while editing the seeded FREE row. */}
+                  {isFreePlan && <option value="FREE">FREE</option>}
                 </select>
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -232,24 +254,30 @@ export function AdminPlanFormModal({
                   <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">
                     $
                   </span>
-                  <Input
+                  <PlanNumberInput
                     id="plan-price"
-                    type="number"
-                    min={0.01}
+                    min={isFreePlan ? 0 : 0.01}
                     step={0.01}
+                    allowDecimal
+                    disabled={isFreePlan}
                     value={field.value / 100}
-                    onChange={(e) =>
-                      field.onChange(Math.round(parseFloat(e.target.value || '0') * 100))
-                    }
-                    className="h-10 pl-7 text-sm"
+                    onChange={(dollars) => field.onChange(Math.round(dollars * 100))}
+                    className="h-10 pl-7 text-sm disabled:cursor-not-allowed disabled:opacity-60"
                   />
                 </div>
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                {isEdit && plan?.stripeProductId && (
+                {isFreePlan ? (
                   <p className="text-[11px] text-muted-foreground">
-                    Changing the price archives the current Stripe Price and creates a new one.
-                    Existing subscribers keep their price until renewal.
+                    The FREE plan is always $0.00 and can&apos;t be changed.
                   </p>
+                ) : (
+                  isEdit &&
+                  plan?.stripeProductId && (
+                    <p className="text-[11px] text-muted-foreground">
+                      Changing the price archives the current Stripe Price and creates a new one.
+                      Existing subscribers keep their price until renewal.
+                    </p>
+                  )
                 )}
               </Field>
             )}
@@ -274,12 +302,11 @@ export function AdminPlanFormModal({
                       >
                         {f.label}
                       </FieldLabel>
-                      <Input
+                      <PlanNumberInput
                         id={f.key}
-                        type="number"
                         min={-1}
                         value={field.value}
-                        onChange={(e) => field.onChange(parseInt(e.target.value || '0', 10))}
+                        onChange={field.onChange}
                         className="h-9 text-sm"
                       />
                       <p className="text-[10px] text-muted-foreground">{f.helper}</p>
@@ -335,6 +362,7 @@ export function AdminPlanFormModal({
                   <option value="">None</option>
                   <option value="basic">Basic</option>
                   <option value="premium">Premium</option>
+                  <option value="free">Free</option>
                 </select>
               </Field>
             )}
