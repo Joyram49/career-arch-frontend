@@ -4,16 +4,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, type Variants } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
-import type { Resolver } from 'react-hook-form';
-import { Controller, useForm } from 'react-hook-form';
+
+import { Controller, useForm, type Resolver } from 'react-hook-form';
 
 import { Button } from '@ui/button';
 import { Checkbox } from '@ui/checkbox';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@ui/field';
 import { Input } from '@ui/input';
 
-import type { LoginInput } from '@validations/auth.schema';
-import { loginSchema } from '@validations/auth.schema';
+import { loginSchema, type LoginInput } from '@validations/auth.schema';
 
 import { BuildingIcon, EyeOffIcon, EyeOpenIcon, LockIcon, MailIcon } from '@assets/icons/custom';
 import { useAuthStore } from '@lib/store/auth.store';

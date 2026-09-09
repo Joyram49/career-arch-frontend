@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { LogoIcon } from '@assets/icons/custom';
 import ContainerLayout from '@components/layout/ContainerLayout';
 import Link from 'next/link';
+import React from 'react';
 import { AuthSidebar } from './_components/auth-sidebar';
 import { LoginOrgForm } from './_components/org-login-form';
 
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
     'Sign in to your CareerArch organization account to post jobs, manage applications, and hire top talent.',
 };
 
-export default function LoginOrgPage() {
+export default function LoginOrgPage(): React.JSX.Element {
   return (
     <main className="relative flex min-h-screen overflow-hidden bg-background lg:bg-transparent">
       <div
