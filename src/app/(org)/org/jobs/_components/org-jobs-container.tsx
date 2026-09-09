@@ -17,8 +17,8 @@ import { Button } from '@ui/button';
 import Link from 'next/link';
 
 import type { IOrgJobListItem } from '@app-types/org/org.jobs';
-import type { OrgJobsQueryParams } from '@validations/org.jobs.schema';
 
+import { type OrgJobsQueryParams } from '@validations/org.dashboard.schema';
 import { OrgPageHeader } from '../../_components/shared';
 import { type JobConfirmAction, OrgJobConfirmModal } from './org-job-confirm-modal';
 import { OrgJobsFilters } from './org-jobs-filters';
