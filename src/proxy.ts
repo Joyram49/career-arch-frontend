@@ -26,13 +26,13 @@ const PUBLIC_PREFIXES = ['/', '/jobs', '/companies', '/pricing', '/salary-guide'
 
 const ROLE_HOME: Record<string, string> = {
   USER: '/user',
-  ORGANIZATION: '/organization',
+  ORGANIZATION: '/org',
   ADMIN: '/admin',
 };
 
 const PROTECTED_PREFIX_ROLE: Record<string, string> = {
   '/user': 'USER',
-  '/organization': 'ORGANIZATION',
+  '/org': 'ORGANIZATION',
   '/admin': 'ADMIN',
 };
 
