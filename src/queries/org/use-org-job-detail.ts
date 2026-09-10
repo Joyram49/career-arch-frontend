@@ -138,7 +138,8 @@ const MOCK_JOB_DETAILS: Record<string, IOrgJobDetail> = {
 };
 
 const FALLBACK_JOB: IOrgJobDetail = {
-  ...MOCK_JOB_DETAILS['1'],
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  ...MOCK_JOB_DETAILS['1']!,
 };
 
 export function useOrgJobDetail(id: string) {

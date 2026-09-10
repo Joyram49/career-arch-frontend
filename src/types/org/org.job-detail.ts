@@ -11,7 +11,7 @@ export type ApplicationStatusKey =
   | 'WITHDRAWN';
 
 export interface IOrgJobDetail extends IOrgJobListItem {
-  description: string;
+  description: string | undefined;
   requirements: string | null;
   responsibilities: string | null;
   skills: string[];
