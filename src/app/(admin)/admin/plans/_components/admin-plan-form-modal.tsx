@@ -261,7 +261,8 @@ export function AdminPlanFormModal({
                     allowDecimal
                     disabled={isFreePlan}
                     value={field.value / 100}
-                    onChange={(dollars) => field.onChange(Math.round(dollars * 100))}
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    onChange={(dollars) => field.onChange(Math.round(dollars! * 100))}
                     className="h-10 pl-7 text-sm disabled:cursor-not-allowed disabled:opacity-60"
                   />
                 </div>
