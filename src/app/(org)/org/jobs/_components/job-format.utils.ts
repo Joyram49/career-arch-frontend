@@ -14,19 +14,56 @@ export function jobTypeLabel(type: OrgJobType): string {
   return JOB_TYPE_LABELS[type];
 }
 
-export function formatSalaryRange(
-  job: Pick<IOrgJobListItem, 'salaryMin' | 'salaryMax' | 'salaryCurrency'>,
-): string {
+// ── Currency — single source of truth for the salary currency <select> and
+// for symbol lookup in formatSalaryRange, so the two can never drift apart. ──
+export interface CurrencyOption {
+  code: string;
+  symbol: string;
+  label: string;
+}
+
+export const CURRENCY_OPTIONS: CurrencyOption[] = [
+  { code: 'USD', symbol: '$', label: 'USD' },
+  { code: 'EUR', symbol: '€', label: 'EUR' },
+  { code: 'GBP', symbol: '£', label: 'GBP' },
+  { code: 'INR', symbol: '₹', label: 'INR' },
+  { code: 'BDT', symbol: '৳', label: 'BDT' },
+];
+
+function currencySymbol(code: string): string {
+  return CURRENCY_OPTIONS.find((c) => c.code === code)?.symbol ?? `${code} `;
+}
+
+/**
+ * Compacts a raw amount for display. Previously this always divided by 1000
+ * and rounded to a whole number — so 500 -> 0.5 -> "1" and 600 -> 0.6 -> "1",
+ * both displaying as "$1k". Fixed: show the real number below 1,000, and
+ * one decimal place above it (1200 -> "$1.2k", not "$1k").
+ */
+function formatCompactAmount(amount: number): string {
+  if (amount < 1000) return amount.toLocaleString();
+  const thousands = amount / 1000;
+  const formatted = Number.isInteger(thousands) ? thousands.toFixed(0) : thousands.toFixed(1);
+  return `${formatted}k`;
+}
+
+export function formatSalaryRange(job: {
+  salaryMin: number | null | undefined;
+  salaryMax: number | null | undefined;
+  salaryCurrency: string;
+}): string {
   const { salaryMin, salaryMax, salaryCurrency } = job;
-  if (salaryMin === null && salaryMax === null) return 'Not specified';
+  const symbol = currencySymbol(salaryCurrency);
+  const hasMin = salaryMin !== null && salaryMin !== undefined;
+  const hasMax = salaryMax !== null && salaryMax !== undefined;
 
-  const fmt = (n: number): string => `${(n / 1000).toFixed(0)}k`;
-  const symbol = salaryCurrency === 'USD' ? '$' : `${salaryCurrency} `;
+  if (!hasMin && !hasMax) return 'Not specified';
 
-  if (salaryMin !== null && salaryMax !== null) {
-    return `${symbol}${fmt(salaryMin)} – ${symbol}${fmt(salaryMax)}`;
+  if (hasMin && hasMax) {
+    return `${symbol}${formatCompactAmount(salaryMin as number)} – ${symbol}${formatCompactAmount(salaryMax as number)}`;
   }
-  return `${symbol}${fmt((salaryMin ?? salaryMax) as number)}+`;
+
+  return `${symbol}${formatCompactAmount((salaryMin ?? salaryMax) as number)}+`;
 }
 
 export function deadlineLabel(job: IOrgJobListItem): { text: string; isUrgent: boolean } {

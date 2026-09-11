@@ -1,3 +1,5 @@
+import { todayISODate } from '@/utils/date-utils';
+import { stripHtml } from '@/utils/strip-html';
 import { z } from 'zod';
 
 export const orgJobFormSchema = z
@@ -14,17 +16,55 @@ export const orgJobFormSchema = z
 
     category: z.string().trim().min(1, 'Category is required'),
     vacancies: z.number().int().min(1, 'At least 1 vacancy is required').max(999).default(1),
-    deadline: z.string().optional().or(z.literal('')),
+
+    // Must be strictly after today — checked again below since a manually
+    // typed/pasted value could bypass the <input min> attribute.
+    deadline: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine((val) => !val || val > todayISODate(), {
+        message: 'Deadline must be a future date',
+      }),
+
     requiredPlan: z.enum(['FREE', 'BASIC', 'PREMIUM']).default('FREE'),
 
-    description: z.string().trim().min(50, 'Description must be at least 50 characters'),
-    responsibilities: z.string().trim().optional().or(z.literal('')),
+    // Rich-text fields: TipTap emits HTML like "<p>&nbsp;</p>" for an
+    // "empty" editor, which has non-zero .length — so length checks must
+    // run against the *stripped plain text*, never the raw HTML string.
+    description: z
+      .string()
+      .transform((html) => html.trim())
+      .superRefine((html, ctx) => {
+        const text = stripHtml(html);
+        if (text.length === 0) {
+          ctx.addIssue({ code: 'custom', message: 'Description is required' });
+        } else if (text.length < 50) {
+          ctx.addIssue({ code: 'custom', message: 'Description must be at least 50 characters' });
+        }
+      }),
 
-    requirements: z.string().trim().optional().or(z.literal('')),
+    // Optional rich text: if the user only typed whitespace/formatting with
+    // no real characters, normalize to '' rather than saving a "populated"
+    // field that's actually blank.
+    responsibilities: z
+      .string()
+      .transform((html) => (stripHtml(html).length === 0 ? '' : html.trim()))
+      .optional()
+      .or(z.literal('')),
+
+    requirements: z
+      .string()
+      .transform((html) => (stripHtml(html).length === 0 ? '' : html.trim()))
+      .optional()
+      .or(z.literal('')),
+
     skills: z
-      .array(z.string().trim().min(1))
-      .min(1, 'Add at least one skill')
-      .max(20, 'You can add up to 20 skills'),
+      .array(z.string())
+      .transform((arr) => arr.map((s) => s.trim()).filter((s) => s.length > 0))
+      .refine((arr) => arr.length > 0, { message: 'Add at least one skill' })
+      .refine((arr) => arr.length <= 20, { message: 'You can add up to 20 skills' }),
+
     experienceLevel: z.enum(['Entry', 'Mid', 'Senior', 'Lead']).optional(),
   })
   .superRefine((data, ctx) => {
@@ -62,7 +102,15 @@ export const orgJobFormSchema = z
         });
       }
     }
-  });
+  })
+  // Once "Don't specify salary" is checked, whatever was previously typed
+  // into min/max is discarded at submit time — the fields are only visually
+  // disabled otherwise, so leftover values would silently persist.
+  .transform((data) => ({
+    ...data,
+    salaryMin: data.salaryNotSpecified ? undefined : data.salaryMin,
+    salaryMax: data.salaryNotSpecified ? undefined : data.salaryMax,
+  }));
 
 export type OrgJobFormInput = z.infer<typeof orgJobFormSchema>;
 
