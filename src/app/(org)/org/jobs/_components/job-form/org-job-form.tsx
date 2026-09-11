@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/incompatible-library */
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,10 +23,19 @@ import { useJobFormWizard } from './use-job-form-wizard';
 interface OrgJobFormProps {
   mode: 'create' | 'edit';
   jobId?: string;
+  /** The job's status as it exists today — required in edit mode so saving
+   *  doesn't accidentally change it (e.g. re-publishing a Draft just by
+   *  clicking "Save Changes"). Ignored in create mode. */
+  currentStatus?: 'DRAFT' | 'PUBLISHED';
   initialValues?: Partial<OrgJobFormInput>;
 }
 
-export function OrgJobForm({ mode, jobId, initialValues }: OrgJobFormProps): React.JSX.Element {
+export function OrgJobForm({
+  mode,
+  jobId,
+  currentStatus,
+  initialValues,
+}: OrgJobFormProps): React.JSX.Element {
   const router = useRouter();
   const createJob = useCreateJob();
   const updateJob = useUpdateJob();
@@ -44,7 +54,6 @@ export function OrgJobForm({ mode, jobId, initialValues }: OrgJobFormProps): Rea
     handleSubmit,
   } = form;
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const isRemote = watch('isRemote');
   const salaryNotSpecified = watch('salaryNotSpecified');
   const values = watch();
@@ -55,8 +64,11 @@ export function OrgJobForm({ mode, jobId, initialValues }: OrgJobFormProps): Rea
   function submit(status: 'DRAFT' | 'PUBLISHED'): void {
     void handleSubmit((data) => {
       if (mode === 'edit' && jobId) {
+        // Edit never changes lifecycle status on its own — "Save Changes"
+        // keeps whatever status the job already had. Publishing/closing/
+        // archiving stays the job's own dedicated actions.
         updateJob.mutate(
-          { id: jobId, ...data, status },
+          { id: jobId, ...data, status: currentStatus ?? status },
           { onSuccess: () => router.push(`/org/jobs/${jobId}`) },
         );
       } else {

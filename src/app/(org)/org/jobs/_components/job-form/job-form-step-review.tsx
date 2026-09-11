@@ -2,20 +2,10 @@
 
 import type { OrgJobFormInput } from '@validations/org.job-form.schema';
 
-import { jobTypeLabel } from '../job-format.utils';
+import { formatSalaryRange, jobTypeLabel } from '../job-format.utils';
 
 interface JobFormStepReviewProps {
   values: OrgJobFormInput;
-}
-
-function formatPreviewSalary(values: OrgJobFormInput): string {
-  if (values.salaryNotSpecified || (!values.salaryMin && !values.salaryMax)) return 'Not specified';
-  const symbol = values.salaryCurrency === 'USD' ? '$' : `${values.salaryCurrency} `;
-  const fmt = (n: number): string => `${(n / 1000).toFixed(0)}k`;
-  if (values.salaryMin !== undefined && values.salaryMax !== undefined) {
-    return `${symbol}${fmt(values.salaryMin)} – ${symbol}${fmt(values.salaryMax)}`;
-  }
-  return `${symbol}${fmt((values.salaryMin ?? values.salaryMax) as number)}+`;
 }
 
 function RichPreview({ html }: { html: string }): React.JSX.Element {
@@ -28,6 +18,15 @@ function RichPreview({ html }: { html: string }): React.JSX.Element {
 }
 
 export function JobFormStepReview({ values }: JobFormStepReviewProps): React.JSX.Element {
+  const salaryDisplay = formatSalaryRange({
+    // "Don't specify salary" wins regardless of whatever is still sitting in
+    // the (disabled) min/max fields — same rule the schema's final transform
+    // applies at submit time, kept in sync here for the live preview.
+    salaryMin: values.salaryNotSpecified ? null : (values.salaryMin ?? null),
+    salaryMax: values.salaryNotSpecified ? null : (values.salaryMax ?? null),
+    salaryCurrency: values.salaryCurrency,
+  });
+
   return (
     <div className="flex flex-col gap-4">
       <div className="rounded-xl border border-border bg-card p-5">
@@ -45,7 +44,7 @@ export function JobFormStepReview({ values }: JobFormStepReviewProps): React.JSX
             {values.vacancies} vacanc{values.vacancies === 1 ? 'y' : 'ies'}
           </span>
         </p>
-        <p className="mt-2 text-sm font-bold text-brand-emerald">{formatPreviewSalary(values)}</p>
+        <p className="mt-2 text-sm font-bold text-brand-emerald">{salaryDisplay}</p>
         {values.deadline && (
           <p className="mt-1 text-xs text-muted-foreground">Deadline: {values.deadline}</p>
         )}
