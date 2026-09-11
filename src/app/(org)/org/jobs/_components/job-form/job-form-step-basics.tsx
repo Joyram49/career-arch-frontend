@@ -1,5 +1,7 @@
 'use client';
 
+import { tomorrowISODate } from '@/utils/date-utils';
+import { PlanNumberInput } from '@components/shared/plan-number-input';
 import { cn } from '@lib/utils';
 import { Checkbox } from '@ui/checkbox';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@ui/field';
@@ -7,6 +9,8 @@ import { Input } from '@ui/input';
 import { Controller, type Control, type FieldErrors } from 'react-hook-form';
 
 import type { OrgJobFormInput } from '@validations/org.job-form.schema';
+
+import { CURRENCY_OPTIONS } from '../job-format.utils';
 
 const JOB_TYPES: { value: OrgJobFormInput['jobType']; label: string }[] = [
   { value: 'FULL_TIME', label: 'Full-time' },
@@ -142,14 +146,14 @@ export function JobFormStepBasics({
             control={control}
             render={({ field }) => (
               <Field data-invalid={!!errors.salaryMin}>
-                <Input
-                  type="number"
-                  placeholder="Min"
+                <PlanNumberInput
+                  id="job-salary-min"
+                  value={field.value}
+                  onChange={field.onChange}
+                  min={0}
+                  allowEmpty
                   disabled={salaryNotSpecified}
-                  value={field.value ?? ''}
-                  onChange={(e) =>
-                    field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
-                  }
+                  placeholder="Min"
                 />
                 {errors.salaryMin && <FieldError errors={[errors.salaryMin]} />}
               </Field>
@@ -160,14 +164,14 @@ export function JobFormStepBasics({
             control={control}
             render={({ field }) => (
               <Field data-invalid={!!errors.salaryMax}>
-                <Input
-                  type="number"
-                  placeholder="Max"
+                <PlanNumberInput
+                  id="job-salary-max"
+                  value={field.value}
+                  onChange={field.onChange}
+                  min={0}
+                  allowEmpty
                   disabled={salaryNotSpecified}
-                  value={field.value ?? ''}
-                  onChange={(e) =>
-                    field.onChange(e.target.value === '' ? undefined : Number(e.target.value))
-                  }
+                  placeholder="Max"
                 />
                 {errors.salaryMax && <FieldError errors={[errors.salaryMax]} />}
               </Field>
@@ -182,10 +186,11 @@ export function JobFormStepBasics({
                 className="h-9 rounded-lg border border-border bg-input px-3 text-sm text-foreground disabled:opacity-50"
                 {...field}
               >
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="INR">INR</option>
+                {CURRENCY_OPTIONS.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.label}
+                  </option>
+                ))}
               </select>
             )}
           />
@@ -238,12 +243,11 @@ export function JobFormStepBasics({
           render={({ field }) => (
             <Field data-invalid={!!errors.vacancies}>
               <FieldLabel htmlFor="job-vacancies">Vacancies</FieldLabel>
-              <Input
+              <PlanNumberInput
                 id="job-vacancies"
-                type="number"
-                min={1}
                 value={field.value}
-                onChange={(e) => field.onChange(e.target.value === '' ? 1 : Number(e.target.value))}
+                onChange={(v) => field.onChange(v ?? 1)}
+                min={1}
               />
               {errors.vacancies && <FieldError errors={[errors.vacancies]} />}
             </Field>
@@ -254,10 +258,20 @@ export function JobFormStepBasics({
           name="deadline"
           control={control}
           render={({ field }) => (
-            <Field>
+            <Field data-invalid={!!errors.deadline}>
               <FieldLabel htmlFor="job-deadline">Application Deadline</FieldLabel>
-              <Input id="job-deadline" type="date" {...field} value={field.value ?? ''} />
-              <FieldDescription>Optional</FieldDescription>
+              <Input
+                id="job-deadline"
+                type="date"
+                min={tomorrowISODate()}
+                {...field}
+                value={field.value ?? ''}
+              />
+              {errors.deadline ? (
+                <FieldError errors={[errors.deadline]} />
+              ) : (
+                <FieldDescription>Optional — must be a future date</FieldDescription>
+              )}
             </Field>
           )}
         />
