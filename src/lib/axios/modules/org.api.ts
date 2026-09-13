@@ -1,6 +1,7 @@
 // src/lib/axios/modules/org.api.ts
 import type { IApiResponse, IPaginationMeta } from '@app-types/api';
 import type { IJob } from '@app-types/job';
+import { type IOrgBillingInfo, type IOrgSetupIntentResponse } from '@app-types/org/org.billing';
 import client from '../client';
 
 const org = {

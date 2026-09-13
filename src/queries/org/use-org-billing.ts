@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import { toast } from 'sonner';
 
-import type { ApiErrorResponse } from '@app-types/api';
+import type { IApiErrorResponse } from '@app-types/api';
 
 /**
  * ── NOT mocked, unlike every other org page built so far ────────────────
@@ -21,7 +21,7 @@ import type { ApiErrorResponse } from '@app-types/api';
  */
 
 function extractErrorMessage(error: unknown, fallback: string): string {
-  const axiosError = error as AxiosError<ApiErrorResponse>;
+  const axiosError = error as AxiosError<IApiErrorResponse>;
   return axiosError.response?.data?.message ?? fallback;
 }
 
