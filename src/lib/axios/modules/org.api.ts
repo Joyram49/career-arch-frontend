@@ -1,6 +1,7 @@
 // src/lib/axios/modules/org.api.ts
 import type { IApiResponse, IPaginationMeta } from '@app-types/api';
 import type { IJob } from '@app-types/job';
+import { type IOrgBillingInfo, type IOrgSetupIntentResponse } from '@app-types/org/org.billing';
 import client from '../client';
 
 const org = {
@@ -71,15 +72,17 @@ const org = {
   },
 
   billing: {
-    get: () => client.get<IApiResponse<{ billing: unknown }>>('/org/billing'),
+    getInfo: () => client.get<IApiResponse<{ billing: IOrgBillingInfo }>>('/org/billing'),
 
     createSetupIntent: () =>
-      client.post<IApiResponse<{ clientSecret: string }>>('/org/billing/setup-intent'),
+      client.post<IApiResponse<IOrgSetupIntentResponse>>('/org/billing/setup-intent'),
 
-    savePaymentMethod: (payload: { paymentMethodId: string }) =>
-      client.post<IApiResponse<null>>('/org/billing/payment-method', payload),
+    savePaymentMethod: (paymentMethodId: string) =>
+      client.post<IApiResponse<{ billing: IOrgBillingInfo }>>('/org/billing/payment-method', {
+        paymentMethodId,
+      }),
 
-    deletePaymentMethod: () => client.delete<IApiResponse<null>>('/org/billing/payment-method'),
+    removePaymentMethod: () => client.delete<IApiResponse<null>>('/org/billing/payment-method'),
   },
 };
 
