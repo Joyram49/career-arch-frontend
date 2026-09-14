@@ -4,6 +4,7 @@ import type { IJob } from '@app-types/job';
 import { type IOrgBillingInfo, type IOrgSetupIntentResponse } from '@app-types/org/org.billing';
 import type {
   IOrgDashboardStats,
+  IOrgJobsPerformanceFilters,
   IOrgJobPerformanceItem,
   IOrgRecentApplicant,
 } from '@app-types/org/org.dashboard';
@@ -93,7 +94,7 @@ const org = {
   dashboard: {
     getStats: () => client.get<IApiResponse<{ stats: IOrgDashboardStats }>>('/org/dashboard/stats'),
 
-    getJobsPerformance: (params?: Record<string, unknown>) =>
+    getJobsPerformance: (params?: IOrgJobsPerformanceFilters) =>
       client.get<IApiResponse<{ jobs: IOrgJobPerformanceItem[]; meta: IPaginationMeta }>>(
         '/org/dashboard/jobs-performance',
         { params },

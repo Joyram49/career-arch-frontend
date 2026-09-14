@@ -39,7 +39,7 @@ export function OrgDashboardStats(): React.JSX.Element | null {
   if (isError) return <StatsErrorState onRetry={refetch} />;
   if (!stats) return null;
 
-  const pendingIncentiveDisplay = `$${(stats.pendingIncentiveAmountCents / 100).toFixed(2)} due`;
+  const pendingIncentiveDisplay = `$${(stats.pendingIncentiveAmount / 100).toFixed(2)} due`;
 
   return (
     <div className="grid grid-cols-4 gap-4 px-6">
