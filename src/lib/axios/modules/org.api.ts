@@ -2,6 +2,11 @@
 import type { IApiResponse, IPaginationMeta } from '@app-types/api';
 import type { IJob } from '@app-types/job';
 import { type IOrgBillingInfo, type IOrgSetupIntentResponse } from '@app-types/org/org.billing';
+import type {
+  IOrgDashboardStats,
+  IOrgJobPerformanceItem,
+  IOrgRecentApplicant,
+} from '@app-types/org/org.dashboard';
 import client from '../client';
 
 const org = {
@@ -83,6 +88,22 @@ const org = {
       }),
 
     removePaymentMethod: () => client.delete<IApiResponse<null>>('/org/billing/payment-method'),
+  },
+
+  dashboard: {
+    getStats: () => client.get<IApiResponse<{ stats: IOrgDashboardStats }>>('/org/dashboard/stats'),
+
+    getJobsPerformance: (params?: Record<string, unknown>) =>
+      client.get<IApiResponse<{ jobs: IOrgJobPerformanceItem[]; meta: IPaginationMeta }>>(
+        '/org/dashboard/jobs-performance',
+        { params },
+      ),
+
+    getRecentApplications: (params?: Record<string, unknown>) =>
+      client.get<IApiResponse<{ applicants: IOrgRecentApplicant[] }>>(
+        '/org/dashboard/recent-applications',
+        { params },
+      ),
   },
 };
 

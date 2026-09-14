@@ -1,8 +1,5 @@
 export type OrgJobStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'ARCHIVED';
 
-export type OrgRequiredPlan = 'FREE' | 'BASIC' | 'PREMIUM';
-
-// ── Overview stats (GET /org/dashboard/stats — not yet implemented) ────────
 export interface IOrgDashboardStats {
   activeJobListings: number;
   jobsExpiringSoon: number;
@@ -11,31 +8,31 @@ export interface IOrgDashboardStats {
   interviewsScheduled: number;
   interviewsThisWeek: number;
   successfulHires: number;
-  pendingIncentiveAmountCents: number;
+  pendingIncentiveAmount: number;
   pendingIncentiveCount: number;
 }
 
-// ── Jobs performance table (GET /org/dashboard/jobs-performance) ───────────
 export interface IOrgJobPerformanceItem {
   id: string;
   title: string;
   slug: string;
   status: OrgJobStatus;
-  requiredPlan: OrgRequiredPlan;
+  requiredPlan: 'FREE' | 'BASIC' | 'PREMIUM';
   applicationsCount: number;
   views: number;
   daysActive: number;
   deadline: string | null;
 }
 
+// The backend's /org/dashboard/jobs-performance only supports page/limit —
+// no search/status filtering exists there (this is a lightweight recent-jobs
+// feed, not the full Job Listings query). Kept in sync with the real
+// endpoint rather than the earlier, broader mock-only shape.
 export interface IOrgJobsPerformanceFilters {
   page: number;
   limit: number;
-  search?: string;
-  status?: OrgJobStatus;
 }
 
-// ── Recent applications panel (GET /org/dashboard/recent-applications) ─────
 export interface IOrgRecentApplicant {
   id: string;
   applicationId: string;
